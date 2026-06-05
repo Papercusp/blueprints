@@ -1,0 +1,68 @@
+# The `merge-resolution` launch blueprint — unify-agent-launches-as-blueprints-2026-06-04 (P1, D-003).
+#
+# A SINGLE-ROLE LAUNCH BLUEPRINT (D-007), EVENT-fired. The git-sync auto-commit
+# routine, on an auto-merge conflict with origin/main, dispatches a merge-resolver
+# agent: it redoes the merge fresh on `main`, resolves the conflict, commits,
+# leaves the tree clean, and does NOT push (the next git-sync tick pushes).
+#
+# Before this plan the launch was a hand-wired invoke-caller: `git-sync-action.ts`
+# `spawnMergeResolver` hardcoded `loopbackFetch(/invoke?role=merge-resolver)`. Now
+# the LAUNCH is declarative — git-sync fires THIS blueprint by its event key via
+# `fireLaunchBlueprintForEvent('git-sync:conflict')`, which resolves the role from
+# here. The conflict DETECTION + the in-flight dedup (`last_resolver`) stay in
+# git-sync (legitimately the trigger's concern); the resolve→commit→leave-clean
+# contract lives inside the merge-resolver agent.
+#
+# Event-fired (D-004): an agent launch keyed off the git-sync conflict event,
+# declared via `triggers.event`. (Single-role launch blueprints are fired through
+# the invoke route, NOT the coord-op program path — see launch-blueprint.ts.)
+id: merge-resolution
+extends: base
+version: 0.1.0
+description: >-
+  Resolve a git-sync auto-merge conflict: a merge-resolver agent redoes the merge
+  fresh on main, resolves, commits, leaves the tree clean, and does not push.
+
+workItem:
+  kind: merge-conflict
+  idPrefix: MRG
+
+spine:
+  decider: merge-resolver
+  maxTurns: 20
+  default:
+    to: idle
+  edges:
+    DONE: { to: done }
+    ESCALATE: { to: escalate, reasonFrom: arg }
+    IDLE: { to: idle }
+
+planner:
+  kind: inline
+
+roles:
+  - id: merge-resolver
+    description: >-
+      Redo the conflicted auto-merge fresh on main, resolve the conflict, commit,
+      leave the tree clean, and do NOT push (the next git-sync tick pushes).
+
+knobs:
+  harnessKind: merge-resolution
+  requiresRepo: true
+
+# Event-rule trigger (D-004/D-007): fired by the git-sync conflict event. git-sync
+# resolves this key → THIS blueprint → invokes the merge-resolver role via the
+# invoke route (single-role launch). Declared here as the firing seam.
+triggers:
+  event: git-sync:conflict
+
+# Dependencies (official-blueprints-cupboard-publish D-002): derived from the
+# merge-resolver persona (scripts/derive-blueprint-deps.mjs) — the resolver
+# escalates an unresolvable conflict and holds the shared-submodule resource
+# lock around the redo-merge.
+dependencies:
+  tools:
+    - coord:escalate
+    - locks:acquire_resource
+    - locks:release_resource
+  plugins: []

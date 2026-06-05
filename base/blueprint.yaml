@@ -1,0 +1,20 @@
+# The `base` blueprint — harness-blueprint-orchestration-2026-06-03 (P-006).
+#
+# ABSTRACT. Carries only the common knobs/role defaults every concrete blueprint
+# shares; it has no workItem/spine of its own and is NEVER loaded standalone
+# (BlueprintSchema requires workItem + spine — `base` only ever appears as a
+# parent in an `extends` merge). Concrete blueprints (`coding`, `research`, …)
+# `extends: base` and supply the runnable shape.
+#
+# Inheritance/merge semantics (the loader): objects deep-merge (child wins on
+# leaf keys); arrays and scalars are replaced wholesale by the child.
+id: base
+version: 0.1.0
+description: >-
+  Abstract base blueprint — common knobs + defaults. Not directly runnable;
+  extended by concrete blueprints.
+
+knobs:
+  logRetention: 500
+  branchIsolation: { enabled: false }
+  worktrees: { enabled: false }

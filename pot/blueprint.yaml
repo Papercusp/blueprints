@@ -1,0 +1,94 @@
+# The `pot` operator blueprint — autoloop-pot-operator-rebuild-2026-06-05 (P0, D-001/D-003).
+#
+# THE MINIMAL SINGLE-ROLE OPERATOR BLUEPRINT. The Pot is the judgment layer over
+# the fleet: woken with "you're the operator in charge of this; figure out what
+# to do", it surveys the blackboard (work_items frontier, the spawn tree, the
+# event log, curation signals), decides with agency (create/supervise harnesses
+# from blueprints, surface a report, ask, wait), and — before ending its turn —
+# DECLARES ITS OWN NEXT WAKE via `pot:declare-wake` (a time, an
+# event-subscription, or nothing). There is NO cadence trigger here by design
+# (D-002): the loop is the operator deciding its own wake, not a timer. The
+# substrate (routines engine, event-reaction rules, the launch primitive) is
+# deterministic plumbing; the operator's judgment is invoked sparingly.
+#
+# Harnesses are the retained autoloop feature-pipelines (coding/research/…),
+# created BY the pot from blueprints — enablement of a harness's autoloop is its
+# own blueprint's `dispatch:`/`triggers:`, not a pot-side flag (D-009).
+id: pot
+extends: base
+version: 0.1.0
+description: >-
+  The Pot operator — the user's single judgment surface over the fleet. Wakes on
+  its own self-declared schedule (or an event it subscribed to), surveys the
+  blackboard, creates/supervises harnesses from blueprints, curates what the
+  user sees, and declares its next wake before sleeping.
+
+workItem:
+  kind: pot-wake
+  idPrefix: POT
+
+# The decider is the OPERATOR role itself (D-001: the pot IS the operator) —
+# it passes the existing role gates (COORD_ROLES/ALL_ROLES) and carries the
+# provisioned operator principal's capabilities; the pot-scoped prompt at
+# blueprints/pot/prompts/operator.md overrides the chat persona for headless
+# wakes (BLUEPRINT_ID prompt scoping).
+spine:
+  decider: operator
+  maxTurns: 50
+  default:
+    to: idle
+  edges:
+    DONE: { to: done }
+    ESCALATE: { to: escalate, reasonFrom: arg }
+    IDLE: { to: idle }
+
+planner:
+  kind: inline
+
+roles:
+  - id: operator
+    description: >-
+      The operator in charge: survey the fleet, decide what matters, create or
+      supervise harnesses from blueprints, surface curated reports, and declare
+      the next wake before ending the turn.
+
+knobs:
+  harnessKind: pot
+  requiresRepo: false
+
+# NO `triggers.schedule` — deliberately. The pot's wake is SELF-DECLARED
+# (pot:declare-wake writes the one-shot `pot-wake` routine / event-reaction
+# subscriptions; pot:wake is the manual fire). A cadence here would reintroduce
+# the timer loop D-002 removes.
+
+# Dependencies (official-blueprints-cupboard-publish D-002): derived from the
+# blueprint-local operator persona (scripts/derive-blueprint-deps.mjs) — the
+# blackboard survey surface, the harness create/supervise verbs, and the
+# self-declared wake pair.
+dependencies:
+  tools:
+    - activity:recent
+    - agent_tools:list
+    - blueprint:catalog
+    - blueprint:extend
+    - blueprint:validate
+    - chat:ask_choice
+    - coord:inbox
+    - coord:presence
+    - curation:feed
+    - harness:create
+    - harness:escalation
+    - harness:get
+    - harness:list
+    - harness:pending_reviews
+    - harness:status
+    - issues:list
+    - memory:forget
+    - memory:search
+    - memory:update
+    - pot:declare-wake
+    - pot:wake
+    - search:fulltext
+    - search:semantic
+    - work_items:list
+  plugins: []

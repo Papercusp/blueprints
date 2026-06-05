@@ -1,0 +1,91 @@
+# The `implement` launch blueprint — unify-agent-launches-as-blueprints-2026-06-04 (P2, D-003).
+#
+# A SINGLE-ROLE LAUNCH BLUEPRINT (D-007), SCHEDULED + RISK-GATED. The
+# self-improvement auto-implement loop (papercusp-self-improvement-loop-2026-06-04
+# Phase 3): take an auto-eligible captured improvement (kind=bug, safe surface) and
+# implement it — reproduce, fix with a regression test, keep it self/inline-sized;
+# the change lands via the release gate.
+#
+# Before this plan the launch was a hand-wired invoke-caller: the
+# `system:improvement-implement` routine action hardcoded `loopbackFetch(/invoke?
+# role=worker)` against a dedicated runner harness. Now the LAUNCH is declarative —
+# the routine fires THIS blueprint via `fireLaunchBlueprint('implement')`, which
+# resolves the role from here. The risk-gate (the pure `planImplementRun`: flag ON,
+# runner configured, kind=bug, cap) STAYS in the routine (legitimately the trigger's
+# concern); the implement contract lives inside the worker agent.
+#
+# DOUBLY GATED: the routine is seeded INACTIVE *and* the
+# `papercusp-improvement-auto-implement` flag defaults OFF — this launch is
+# unreachable until an owner explicitly enables both (D-004 / Phase 3).
+id: implement
+extends: base
+version: 0.1.0
+description: >-
+  Auto-implement an eligible captured improvement (kind=bug): reproduce, fix with a
+  regression test, keep it self/inline-sized; lands via the release gate. Flag-gated
+  OFF + seeded inactive.
+
+workItem:
+  kind: improvement
+  idPrefix: IMP
+
+spine:
+  decider: worker
+  maxTurns: 40
+  default:
+    to: idle
+  edges:
+    DONE: { to: done }
+    ESCALATE: { to: escalate, reasonFrom: arg }
+    IDLE: { to: idle }
+
+planner:
+  kind: inline
+
+roles:
+  - id: worker
+    description: >-
+      Reproduce + fix one auto-eligible improvement (kind=bug) with a regression
+      test, self/inline-sized; VERIFY (tests green) then close the loop via
+      improvements:resolve (outcome fixed | could-not-fix | needs-human — the
+      back-edge that takes a fixed bug out of the queue); escalate instead if it
+      would touch operator-core safety / the deploy machinery / a migration.
+      Prompt: blueprints/implement/prompts/worker.md (blueprint-owned, resolved
+      via BLUEPRINT_ID=implement — close-the-self-improvement-loop D-001).
+
+knobs:
+  harnessKind: implement
+  requiresRepo: true
+
+# Scheduled trigger (D-004): the auto-implement cadence. The routine fires
+# `system:blueprint-run` with payload `{ blueprintId: implement }`. SEEDED INACTIVE
+# + flag-gated OFF (seed-improvement-routines.ts) — see the doubly-gated note above.
+triggers:
+  schedule:
+    - cron: "0 */30 * * * *"
+      action: system:blueprint-run
+
+# Dependencies (official-blueprints-cupboard-publish D-002): derived from the
+# blueprint-local worker persona (scripts/derive-blueprint-deps.mjs) —
+# the improvements intake/resolve pair plus the standard work/coord surface.
+dependencies:
+  tools:
+    - agent_tools:list
+    - artifacts:load
+    - artifacts:save
+    - coord:ask
+    - features:get
+    - features:list_related
+    - harness:phase_path
+    - improvements:capture
+    - improvements:resolve
+    - issues:claim
+    - issues:create
+    - issues:get
+    - messages:inbox
+    - messages:send
+    - topics:feed
+    - topics:list
+    - topics:subscribe
+    - work_items:list
+  plugins: []
