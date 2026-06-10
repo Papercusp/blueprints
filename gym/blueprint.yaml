@@ -78,14 +78,18 @@ roles:
   - { id: committer, description: "On accept, commits the target's .papercusp/blueprint.yaml / prompt and re-projects it (commit→reproject)." }
 
 # Recursion (layer 4 — OTP-style supervision): run-target-variant spawns the TARGET
-# harness as a durable sub-harness. `childBlueprint` is deliberately OMITTED: the
-# child is NOT the gym (self) but the *target* harness's own blueprint, bound by the
-# operator gym at spawn time (the gym improves another harness — D-022). The schema's
-# "defaults to self" note doesn't apply operationally here; the gym runtime overrides
-# the child with the target. one-for-one + maxDepth:1 keeps it bounded (a gym runs
-# target sub-harnesses; those targets do not themselves recurse into more gyms).
+# harness as a durable sub-harness. The child is NOT the gym (self) but the *target*
+# harness's own blueprint (the gym improves another harness — D-022). That was
+# formerly an undeclared runtime override of the schema's "defaults to self";
+# `childBlueprint: $target` now DECLARES the parameterized child (autoloop-pot-
+# operator-rebuild D-008): the gym runtime binds it at spawn time via
+# `resolveChildBlueprint(gymBp, { target: <blueprint-under-optimization> })`
+# (re-exported as the gym primitive `resolveGymChildBlueprint`). one-for-one +
+# maxDepth:1 keeps it bounded (a gym runs target sub-harnesses; those targets do
+# not themselves recurse into more gyms).
 recursion:
   enabled: true
+  childBlueprint: $target
   spawnOn: { role: variant-runner }
   strategy: one-for-one
   maxDepth: 1

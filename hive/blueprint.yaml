@@ -1,0 +1,130 @@
+# The `hive` operator blueprint — autoloop-pot-operator-rebuild-2026-06-05 (P0, D-001/D-003).
+#
+# THE MINIMAL SINGLE-ROLE OPERATOR BLUEPRINT. The Hive is the judgment layer over
+# the fleet: woken with "you're the operator in charge of this; figure out what
+# to do", it surveys the blackboard (work_items frontier, the spawn tree, the
+# event log, curation signals), decides with agency (create/supervise harnesses
+# from blueprints, surface a report, ask, wait), and — before ending its turn —
+# DECLARES ITS OWN NEXT WAKE via `hive:declare-wake` (a time, an
+# event-subscription, or nothing). There is NO cadence trigger here by design
+# (D-002): the loop is the operator deciding its own wake, not a timer. The
+# substrate (routines engine, event-reaction rules, the launch primitive) is
+# deterministic plumbing; the operator's judgment is invoked sparingly.
+#
+# Harnesses are the retained autoloop feature-pipelines (coding/research/…),
+# created BY the hive from blueprints — enablement of a harness's autoloop is its
+# own blueprint's `dispatch:`/`triggers:`, not a hive-side flag (D-009).
+id: hive
+extends: base
+# The Hive IS the hive's blueprint — the privileged kind:'hive' Queen (local-hive
+# D-001 / D-009, swarm D-018). Launchable ONLY as a ROOT (the parentless
+# system:blueprint-run / hive:wake path); the no-nest guard rejects any parented
+# instantiation. Every other built-in blueprint defaults to kind:'harness'.
+kind: hive
+version: 0.1.0
+description: >-
+  The Hive/Hive operator — the Queen in charge of the bee fleet. Wakes on its
+  own self-declared schedule (or an event it subscribed to), surveys the work
+  frontier and bee slots, places ranked tasks onto bees (free slot / graceful-evict+fresh /
+  warm-inject), attaches situational briefs, and declares its next wake. Two roles,
+  both carrying the full Queen role (two-plane coordination, steer-don't-dispatch):
+  the `operator` (the canonical full-role judgment layer, the default decider) and
+  the `queen` (the same role with the dial turned toward placement automation).
+
+workItem:
+  kind: hive-wake
+  idPrefix: POT
+
+# The decider can be EITHER the operator (for traditional decision-tree wakes) OR the
+# queen (for placement automation). Use spine.decider: 'queen' to specialize the hive
+# for bee placement (local-hive P-030). Both pass the existing role gates and carry
+# the provisioned operator principal's capabilities.
+spine:
+  decider: operator
+  # Declared alternative the validator treats as live (not a dead role): an
+  # install swaps this in via spine.decider for placement automation (P-030).
+  deciderAlternatives: [queen]
+  maxTurns: 50
+  default:
+    to: idle
+  edges:
+    DONE: { to: done }
+    ESCALATE: { to: escalate, reasonFrom: arg }
+    IDLE: { to: idle }
+
+planner:
+  kind: inline
+
+roles:
+  - id: operator
+    description: >-
+      The operator in charge: survey the fleet, decide what matters, create or
+      supervise harnesses from blueprints, surface curated reports, and declare
+      the next wake before ending the turn.
+  - id: queen
+    description: >-
+      The Queen — specialized placement decider for the hive. Surveys the work
+      frontier and bee load, ranks tasks, picks a placement for each (free slot /
+      graceful-evict+fresh / warm-inject), attaches situational briefs, and
+      declares the next wake. Proposes placement; bees dispose (own their actual
+      sequencing). (local-hive P-030/P-031/P-032)
+
+knobs:
+  harnessKind: hive
+  requiresRepo: false
+
+# NO `triggers.schedule` — deliberately. The hive's wake is SELF-DECLARED
+# (hive:declare-wake writes the one-shot `hive-wake` routine / event-reaction
+# subscriptions; hive:wake is the manual fire). A cadence here would reintroduce
+# the timer loop D-002 removes.
+
+# Dependencies (official-blueprints-cupboard-publish D-002): the operator-level
+# blackboard survey surface, harness create/supervise, placement tools (Queen role),
+# and self-declared wake. Queen-specific tools: curation:change-feed (the rolled-up
+# completion feed the steering loop reads — B7) + work_items:set_priority (set the
+# BACKLOG order the fleet claims against — the steer-don't-dispatch lever),
+# fleet:assignments (bee load/lists), work_items:reorder (per-bee work-list rank),
+# coord:send with wake (warm-inject), fleet:spawn (free-slot placement).
+dependencies:
+  tools:
+    - activity:recent
+    - agent_tools:list
+    - blueprint:catalog
+    - blueprint:extend
+    - blueprint:validate
+    - chat:ask_choice
+    - coord:inbox
+    - coord:presence
+    - coord:send
+    - curation:change-feed
+    - curation:feed
+    - deploy:harness
+    - deploy:hive
+    - deploy:status
+    - discovery:hives
+    - fleet:assignments
+    - fleet:drain
+    - fleet:spawn
+    - harness:create
+    - harness:escalation
+    - harness:get
+    - harness:list
+    - harness:pending_reviews
+    - harness:status
+    - improvements:digest
+    - improvements:resolve
+    - improvements:triage
+    - inbox:triage
+    - issues:list
+    - memory:forget
+    - memory:search
+    - memory:update
+    - hive:declare-wake
+    - hive:wake
+    - search:fulltext
+    - search:semantic
+    - work_items:co_locate
+    - work_items:list
+    - work_items:reorder
+    - work_items:set_priority
+  plugins: []

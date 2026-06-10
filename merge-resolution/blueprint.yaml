@@ -17,7 +17,7 @@
 # declared via `triggers.event`. (Single-role launch blueprints are fired through
 # the invoke route, NOT the coord-op program path — see launch-blueprint.ts.)
 id: merge-resolution
-extends: base
+extends: single-agent
 version: 0.1.0
 description: >-
   Resolve a git-sync auto-merge conflict: a merge-resolver agent redoes the merge
@@ -27,18 +27,11 @@ workItem:
   kind: merge-conflict
   idPrefix: MRG
 
+# Spine edges + planner inherited from the `single-agent` parent; override the
+# decider role + this launch's turn budget only.
 spine:
   decider: merge-resolver
   maxTurns: 20
-  default:
-    to: idle
-  edges:
-    DONE: { to: done }
-    ESCALATE: { to: escalate, reasonFrom: arg }
-    IDLE: { to: idle }
-
-planner:
-  kind: inline
 
 roles:
   - id: merge-resolver

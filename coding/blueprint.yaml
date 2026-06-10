@@ -129,6 +129,74 @@ knobs:
   requiresRepo: true
   debuggerThreshold: 3
 
+# Coding-specific declared tunables (P-006 / D-003) — these UNION with base's
+# universal params (Dispatch / Backend) when the settings UI introspects a coding
+# harness. KEYED BY config.json instance path (the namespace the settings panel
+# persists). The worker/typecheck/debugger knobs are coding-ONLY (a research/gym
+# harness has its own), which is exactly why HarnessSettingsPanel's old hardcoding
+# of them didn't generalize. `default` carries the runtime default (lanes.ts /
+# the panel) since these have no blueprint-knob default.
+params:
+  "debugger.threshold":
+    label: Debugger gate threshold
+    type: number
+    min: 1
+    max: 20
+    default: 3
+    group: Workers
+    affects: reactive debugger-before-worker gate (fires at attempts ≥ n)
+    description: >-
+      After this many failed worker attempts, a read-only debugger runs before the
+      next worker retry.
+  "parallelWorkers.useChunkLoop":
+    label: Use chunk loop
+    type: boolean
+    default: true
+    group: Workers
+    affects: worker execution model (per-chunk file locks + a typecheck gate)
+    description: Run the worker as a chunked loop (vs a single pass).
+  "parallelWorkers.workingStateCheck":
+    label: Working-state check command
+    type: string
+    default: pnpm typecheck
+    group: Workers
+    affects: worker gate — the command run after each chunk's edits
+    description: >-
+      Shell command the worker runs to verify a working state between chunks.
+  "parallelWorkers.replanStrikes":
+    label: Replan strikes
+    type: number
+    min: 1
+    max: 20
+    default: 3
+    group: Workers
+    affects: worker chunk loop — working-state failures before escalating
+    description: How many working-state-check failures before the chunk loop escalates.
+  "parallelWorkers.escalateToRole":
+    label: Escalate to role
+    type: string
+    default: debugger
+    group: Workers
+    affects: worker chunk loop — the role taken over after the strike limit
+    description: The agent role the chunk loop hands off to after the strike limit.
+
+# The build/run environment spec — "what to stand up on a frame"
+# (cloud-deployment-layer-2026-06-06 P-007). First-class + placement-agnostic: the
+# SHAPE is identical local vs cloud. Empty here by design — a coding harness's
+# actual build/test/run commands are PER-REPO, detected by harness:generate-from-repo
+# (which already sets knobs.testCommand) or set per instance, NOT hardcoded across
+# every coding harness. The deployment driver's install() reads the resolved spec to
+# bootstrap a cloud frame; empty arrays ⇒ nothing to stand up (today's local behavior).
+environment:
+  setup: [] # one-time machine setup (toolchains) — e.g. ["nvm install 22"]
+  install: [] # dependency install — e.g. ["npm ci"]
+  build: [] # build — e.g. ["npm run build"]
+  test: [] # test command(s) — usually mirrors knobs.testCommand
+  run: [] # long-running app/dev-server start — e.g. ["npm run dev"]
+  services: [] # background services (DB/cache) — {name, command, port?, healthcheck?}
+  ports: [] # ports the frame must expose
+  env: {} # NON-SECRET env vars (secrets ride deployment.credentialRef)
+
 # Tool/plugin dependencies (official-blueprints-cupboard-publish-2026-06-05
 # D-002): what this blueprint's roles actually call, derived from the role
 # personas (scripts/derive-blueprint-deps.mjs) + validated against the live

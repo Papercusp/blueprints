@@ -19,7 +19,7 @@
 # DONE/ESCALATE/IDLE edges make the decider spine well-formed (validate.ts requires
 # a reachable terminal) without modelling a fake multi-role pipeline.
 id: deploy
-extends: base
+extends: single-agent
 version: 0.1.0
 description: >-
   The release-gate deploy launch: the release-manager agent reviews the gathered
@@ -33,22 +33,14 @@ workItem:
   kind: deploy-run
   idPrefix: DEP
 
+# Spine edges + planner inherited from the `single-agent` parent. The
+# release-manager emits its terminal verb; there is no second role to dispatch
+# (single-role launch) — go/no-go + rollback are the agent's own gate, and it
+# plans within its own turn (no plans→features import). Override the decider role
+# + turn budget only.
 spine:
   decider: release-manager
   maxTurns: 20
-  default:
-    to: idle
-  edges:
-    # The release-manager emits its terminal verb; there is no second role to
-    # dispatch (single-role launch). go/no-go + rollback are the agent's own gate.
-    DONE: { to: done }
-    ESCALATE: { to: escalate, reasonFrom: arg }
-    IDLE: { to: idle }
-
-# The release-manager plans within its own turn (gathers the deploy plan via its
-# tools) — no plans→features import.
-planner:
-  kind: inline
 
 roles:
   - id: release-manager

@@ -18,3 +18,39 @@ knobs:
   logRetention: 500
   branchIsolation: { enabled: false }
   worktrees: { enabled: false }
+
+# Declared UI-introspectable tunables (psu-isolation-and-blueprint-aware-harness-ui
+# P-006 / D-003 / D-007). The UNIVERSAL params every harness shows, KEYED BY DOT-PATH
+# into the per-harness INSTANCE config (the `config.json` namespace the settings panel
+# reads + writes — NOT the blueprint-`knobs` namespace). A concrete blueprint ADDS its
+# own params (the record UNIONS across `extends` — base ∪ child). The schema-driven
+# settings panel (P-008) introspects this, so ANY blueprint — including a Cupboard-
+# installed third-party one — gets a working panel for free.
+params:
+  "parallelWorkers.max":
+    label: Max concurrent work items
+    type: number
+    min: 1
+    max: 64
+    default: 1
+    group: Dispatch
+    affects: autoloop — total concurrent work-item slots (overrides dispatch.concurrency)
+    description: >-
+      How many work items this harness runs in parallel. The orchestrator's imperative
+      safety ceiling still clamps this (tighten-only, never a raise).
+  "aiBackend.default.model":
+    label: Agent model
+    type: string
+    group: Backend
+    affects: every role's agent invocation (the default backend)
+    description: >-
+      Default model id for this harness's agents (a role can override). e.g.
+      claude-opus-4-8.
+  "aiBackend.default.agentCmd":
+    label: Agent command
+    type: string
+    group: Backend
+    affects: how agents are launched (the default backend)
+    description: >-
+      The CLI/backend command agents launch with. Do NOT put a secret here — an API
+      key belongs in the credential store, never this config.

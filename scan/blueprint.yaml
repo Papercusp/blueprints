@@ -16,7 +16,7 @@
 # finding via `improvements:capture` (the self-improvement loop's intake), so the
 # output naturally lands as work_items in the one backlog.
 id: scan
-extends: base
+extends: single-agent
 version: 0.1.0
 description: >-
   Proactive workspace scan: the scanner sweeps for latent problems + improvement
@@ -27,18 +27,11 @@ workItem:
   kind: scan-run
   idPrefix: SCAN
 
+# Spine edges + planner inherited from the `single-agent` parent; override the
+# decider role + this launch's turn budget only.
 spine:
   decider: scanner
   maxTurns: 30
-  default:
-    to: idle
-  edges:
-    DONE: { to: done }
-    ESCALATE: { to: escalate, reasonFrom: arg }
-    IDLE: { to: idle }
-
-planner:
-  kind: inline
 
 roles:
   - id: scanner

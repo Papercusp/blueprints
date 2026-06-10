@@ -18,7 +18,7 @@
 # `papercusp-improvement-auto-implement` flag defaults OFF — this launch is
 # unreachable until an owner explicitly enables both (D-004 / Phase 3).
 id: implement
-extends: base
+extends: single-agent
 version: 0.1.0
 description: >-
   Auto-implement an eligible captured improvement (kind=bug): reproduce, fix with a
@@ -29,18 +29,10 @@ workItem:
   kind: improvement
   idPrefix: IMP
 
+# Spine + planner (the single-role run-to-done shape) are inherited from the
+# `single-agent` parent; override only the decider role (worker).
 spine:
   decider: worker
-  maxTurns: 40
-  default:
-    to: idle
-  edges:
-    DONE: { to: done }
-    ESCALATE: { to: escalate, reasonFrom: arg }
-    IDLE: { to: idle }
-
-planner:
-  kind: inline
 
 roles:
   - id: worker
