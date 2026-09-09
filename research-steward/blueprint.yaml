@@ -1,0 +1,14 @@
+# Local non-engineering identity proof — identities-v1 P-042 / D-031.
+#
+# This is an ABSTRACT identity layer. It fills the research domain slot and is
+# composed with the runnable `research` blueprint by the local proof fixture;
+# it is not a second scheduler, store, or product surface.
+id: research-steward
+extends: base
+version: 0.1.0
+description: >-
+  IDENTITY (abstract — a layer, never runnable alone): research and
+  documentation stewardship for a repo-less task pipeline.
+
+slots:
+  - slot: domain

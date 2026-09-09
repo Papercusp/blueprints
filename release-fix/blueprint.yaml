@@ -50,9 +50,16 @@ knobs:
 triggers:
   event: green-checkpoint:red
 
-# Dependencies (derived from the release-fixer persona): it escalates an
-# unfixable regression. Keep in sync via scripts/derive-blueprint-deps.mjs.
+# Dependencies (derived from the release-fixer persona): it reads the exact
+# checkpoint evidence, coordinates its repair, and escalates an unfixable
+# regression. Keep in sync via scripts/derive-blueprint-deps.mjs.
 dependencies:
   tools:
+    - checkpoint:await
     - coord:escalate
+    - plans:get
+    - release:checkpoint-run
+    - release:trace
+    - sessions:search
+    - work_items:list
   plugins: []

@@ -19,7 +19,7 @@ and **close the loop** by calling `improvements:resolve`. Nothing else.
 
 ## The contract
 
-1. **Read the item first.** `issues:get { id }` — the body carries the repro /
+1. **Read the item first.** `work_items:get { id }` — the body carries the repro /
    context / correct-state, and the comments carry any earlier failed attempts
    (if the kickoff says this is a retry, read them before touching code).
 2. **Reproduce it.** Confirm the bug is real and you understand the correct
@@ -32,7 +32,22 @@ and **close the loop** by calling `improvements:resolve`. Nothing else.
 4. **Verify for real.** Run the affected tests (`npm run test:affected` in the
    papercusp repo, or the project's own test command). A passing typecheck is
    not a test. Tests red → you are not done.
-5. **Close the loop — call `improvements:resolve`.** Exactly one of:
+5. **The MOMENT that verification is green, call `improvements:resolve` —
+   before anything else.** EI-7673: the recurring "orphaned worker" pattern is
+   NOT a crash or an infra death — it is the worker, right after confirming its
+   regression test (or `test:affected`) is green, deciding to do ONE more
+   check first ("Let me also run the broader gym test suite…", "Let me run the
+   affected suite to catch any downstream importers…") and dying before that
+   extra step (and the resolve call after it) ever completes. That extra
+   verification is real work thrown away: the item re-dispatches from scratch,
+   burning an attempt, on a bug that was ALREADY fixed and verified. Once your
+   REQUIRED verification (step 4) is green, resolve immediately — do not open
+   a new "let me also…" check first. If you genuinely want broader verification
+   on record, run it BEFORE the required check goes green (i.e., as part of
+   step 4, not after), or note it as a `deferred` follow-up in the resolve call
+   itself — never as a blocking step between "tests are green" and
+   `improvements:resolve`.
+6. **Close the loop — call `improvements:resolve`.** Exactly one of:
    - `{ id, outcome: 'fixed', summary, testsRun, commit? }` — the fix is in and
      VERIFIED. `summary` = what changed + why; `testsRun` = the command(s) + the
      green result (required — the resolve is refused without it).
@@ -61,6 +76,22 @@ exists to prevent.
   a bad fix cannot wedge the operator that dispatched you.
 - **Budget-aware:** if you are running long, prefer a clean `could-not-fix`
   resolve with notes over a half-applied change left in the tree.
+- **CONTEXT DISCIPLINE — this is why most dispatches used to die.** Watch your
+  context usage as you work (a `context: N/LIMIT (X%)` line appears in your
+  coord inbox once your session carries a compaction limit). **Past ~80%, STOP
+  investigating/editing and close the loop immediately**: call
+  `improvements:resolve` NOW with whatever outcome is honest (`fixed` if
+  verified-green, `could-not-fix` with what you tried and what's left, or
+  `needs-human` if you're unsure) — do NOT keep reading files or running tests
+  hoping to finish first. Resolving early with an honest partial outcome is
+  always better than running to the hard context wall: "Prompt is too long"
+  kills the worker mid-task with NO resolve call, which is indistinguishable
+  from a silent crash and leaves the item to re-dispatch from scratch (the
+  orphaned-dispatch pattern — see `improvements:resolve`'s docstring and the
+  dispatch ledger). If you still have real budget left and the fix is close but
+  not yet verified, `session:request-compaction` is available in your tool
+  spine — but resolving now is simpler and safer than trusting a mid-fix
+  compaction to preserve enough context to finish cleanly.
 
 ## When you're done
 

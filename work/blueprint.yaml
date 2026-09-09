@@ -67,13 +67,19 @@ lexicon:
   workUnit: deliverable
   reviewGate: review
 
-# Learning: a fresh work hive seeds the generic `work` learning pack
+# Knowledge: a fresh work pot seeds the generic `work` knowledge pack
 # (domain-generic-hive-architecture-2026-06-18 P-017, D-010) — generic work
-# wisdom, NOT project-specific — and runs the scout ideation loop (no coding
-# gym). `pack: work` overrides the inherited `pack: coding` from `hive` (the
-# extends deep-merge replaces the scalar); `loops: [scout]` is work-only.
-learning:
+# wisdom, NOT project-specific. `pack: work` overrides the inherited
+# `pack: coding` (the extends deep-merge replaces the scalar).
+#
+# The seed pack moved `learning.pack` → `knowledge.pack` in the
+# learning→knowledge-packs rename (cupboard-public-release-2026-07-12 P-001).
+# The learning LOOPS are a different system and keep the `learning:` block.
+knowledge:
   pack: work
+
+# Learning: the scout ideation loop (no coding gym); `loops: [scout]` is work-only.
+learning:
   loops:
     - scout
 

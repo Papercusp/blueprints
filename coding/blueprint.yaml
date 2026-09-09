@@ -1,247 +1,244 @@
-# The `coding` harness blueprint — harness-blueprint-orchestration-2026-06-03.
+# The `hive` operator blueprint — autoloop-pot-operator-rebuild-2026-06-05 (P0, D-001/D-003).
 #
-# A behavior-preserving lift of the legacy per-feature director loop +
-# `classifyDecision` switch into declared spine edges (D-024, flat-graph-first).
-# `deriveNext(coding.spine, …)` is byte-equivalent to `classifyDecision(…)` —
-# proven by the operator-side equivalence test before the live wire-in (P-004).
+# THE MINIMAL SINGLE-ROLE OPERATOR BLUEPRINT. The Hive is the judgment layer over
+# the fleet: woken with "you're the operator in charge of this; figure out what
+# to do", it surveys the blackboard (work_items frontier, the spawn tree, the
+# event log, curation signals), decides with agency (create/supervise harnesses
+# from blueprints, surface a report, ask, wait), and — before ending its turn —
+# DECLARES ITS OWN NEXT WAKE via `hive:declare-wake` (a time, an
+# event-subscription, or nothing). There is NO cadence trigger here by design
+# (D-002): the loop is the operator deciding its own wake, not a timer. The
+# substrate (routines engine, event-reaction rules, the launch primitive) is
+# deterministic plumbing; the operator's judgment is invoked sparingly.
 #
-# This is the zero-regression anchor for the whole plan: the gym A/B gate (D-014)
-# runs the hardcoded path vs the blueprint path over a task set and must show no
-# regression. Stored git-canonical at `.papercusp/blueprint.yaml` per harness,
-# projected to PG (D-006/D-021).
+# Harnesses are the retained autoloop feature-pipelines (coding/research/…),
+# created BY the hive from blueprints — enablement of a harness's autoloop is its
+# own blueprint's `dispatch:`/`triggers:`, not a hive-side flag (D-009).
 id: coding
 extends: base
+# The Hive IS the hive's blueprint — the privileged kind:'hive' Queen (local-hive
+# D-001 / D-009, swarm D-018). Launchable ONLY as a ROOT (the parentless
+# system:blueprint-run / hive:wake path); the no-nest guard rejects any parented
+# instantiation. Every other built-in blueprint defaults to kind:'harness'.
+kind: pot
 version: 0.1.0
+
+# Structured retirement (WI-5645 no-retirement-launch-guard, applied by
+# retire-mug-kettle-su-only-2026-08-09 P-062).
+#
+# ⚠ READ THE ID BEFORE YOU PANIC: `coding` here is the POT/HIVE blueprint — the
+# Mug's own launch blueprint (kind:'pot', spine.decider:'mug') — NOT the
+# user-project coding pipeline. Conflating the two is a recorded trap (EI-15663).
+# Retiring this does NOT retire coding harnesses; it retires the Queen.
+#
+# WHY the whole blueprint and not just the `- id: mug` role declaration below:
+# this blueprint's SPINE DECIDER is `mug` (spine.decider, ~line 47). Deleting the
+# role while the decider still names it leaves a dangling reference that
+# validate.ts only *warns* about (`decider-undeclared`) — a blueprint that looks
+# live, resolves fine, and fails at dispatch. The roles list is therefore left
+# INTACT (the coding-factory precedent does the same) and the retirement is
+# declared once, structurally, where a guard actually reads it.
+#
+# `retired` deep-merges through `extends`, so `work` (extends: coding) inherits
+# this. That is CORRECT, not collateral: `work` overrides neither the spine nor
+# the decider, so it is equally mug-driven and equally undispatchable.
+#
+# This is the second, independent lock: the `mug` role is already refused at all
+# three role-admission doors (RETIRED_TIER_ROLES, D-018/D-022) — including the
+# `/invoke` route every launch-blueprint and wake path traverses. That guard
+# refuses a role NAME; this one refuses the BLUEPRINT before anything spends
+# against it.
+#
+# To revive (the flag is `case:'cutover'` — reversibility is the point): delete
+# this block AND flip `FLAGS.MUG_KETTLE_SYSTEM` ON.
+retired:
+  at: "2026-08-09"
+  reason: >-
+    The Mug/Kettle/Cup tier is retired — su + GOAL mode are the only way to drive
+    the app (retire-mug-kettle-su-only-2026-08-09, D-020, owner-directed). This is
+    the pot/hive blueprint whose spine decider is the `mug` role, which no longer
+    admits at any spawn door, so no run started from it can dispatch a turn.
+    Inherited by `work`. Does NOT affect user-project coding harnesses.
+
 description: >-
-  The default coding harness: a per-feature director drives
-  scoper → architect → worker → validator → reviewer → documenter → curator,
-  with opt-in quality gates (tester / security / crosscheck / ui-qa).
+  The Hive/Hive operator — the Queen in charge of the bee fleet. Wakes on its
+  own self-declared schedule (or an event it subscribed to), surveys the work
+  frontier and bee slots, places ranked tasks onto bees (free slot / graceful-evict+fresh /
+  warm-inject), attaches situational briefs, and declares its next wake. Two roles,
+  both carrying the full Queen role (two-plane coordination, steer-don't-dispatch):
+  the `operator` (the canonical full-role judgment layer, the default decider) and
+  the `queen` (the same role with the dial turned toward placement automation).
 
 workItem:
-  kind: feature
-  idPrefix: F
+  kind: hive-wake
+  idPrefix: POT
 
-# The autoloop dispatch policy (autoloop-pot-operator-rebuild-2026-06-05 D-005):
-# the orchestrator runs up to 4 feature pipelines at once for a coding harness,
-# filling slots in strict plan-priority order. Per-install config
-# (`parallelWorkers.*` / `maxCostUsd` in .papercusp/config.json) overrides; the
-# orchestrator's imperative SAFETY_CEILING still clamps (D-007). Readiness is
-# inherited from the schema default (the legacy needs-work set) — declared
-# nowhere here on purpose, so the coding pipeline's selection is byte-identical
-# to the pre-lift hardcoded policy.
-dispatch:
-  concurrency: 4
-  priority: plan-order
-
-# The orchestration spine. The decider (director) emits a DecisionVerb each turn;
-# deriveNext maps it to a PipelineAction. Every DECISION_VERB has an explicit
-# edge (parity with the exhaustive switch); a null/unparseable decision hits
-# `default` (stop cleanly — the dispatcher re-scans).
+# The decider can be EITHER the operator (for traditional decision-tree wakes) OR the
+# queen (for placement automation). Use spine.decider: 'queen' to specialize the hive
+# for bee placement (local-hive P-030). Both pass the existing role gates and carry
+# the provisioned operator principal's capabilities.
 spine:
-  decider: director
-  maxTurns: 200
+  # Placement automation ON (owner mandate 2026-06-11, "get the hive fully
+  # autonomous" — the P-030 swap): demand/cadence wakes launch the QUEEN
+  # placement persona (spawn/warm-inject/drain bees) instead of the steer-only
+  # operator decider. Swap back to `operator` for decision-tree-only wakes.
+  decider: mug
+  # Declared alternative the validator treats as live (not a dead role): an
+  # install swaps this in via spine.decider for placement automation (P-030).
+  deciderAlternatives: [operator]
+  maxTurns: 50
   default:
     to: idle
   edges:
-    # ── terminal ──
     DONE: { to: done }
     ESCALATE: { to: escalate, reasonFrom: arg }
     IDLE: { to: idle }
-    # Deprecated — legacy loop treats CHECKPOINT as ESCALATE (milestone gates are
-    # now needs-human plan items).
-    CHECKPOINT: { to: escalate, reasonFrom: arg, reason: "checkpoint (deprecated)" }
-    # ── per-feature lifecycle (carry FEATURE_ID) ──
-    # NEXT_WORKER N=k (parallel lanes) is the GLOBAL orchestrator's job, not the
-    # per-feature pipeline's → unsupported (rejectWhenParallel).
-    NEXT_WORKER: { to: role, role: worker, extras: ["FEATURE_ID={feature}"], rejectWhenParallel: true }
-    NEXT_VALIDATOR: { to: role, role: validator, extras: ["FEATURE_ID={feature}"] }
-    NEXT_ARCHITECT: { to: role, role: architect, extras: ["FEATURE_ID={feature}"] }
-    NEXT_SCOPER: { to: role, role: scoper, extras: ["FEATURE_ID={feature}"] }
-    # ── quality verbs ──
-    NEXT_TESTER: { to: role, role: tester, extras: ["VAL_ID={arg}"] }
-    NEXT_SECURITY: { to: role, role: security-reviewer, extras: [] }
-    GENERATE_TESTS: { to: role, role: test-writer, extras: [] }
-    NEXT_MONITOR: { to: role, role: monitor, extras: [] }
-    # ── opt-in quality gates (dormant by default — the director only EMITS these
-    #    when the harness opts in; "wiring ≠ forcing cost") ──
-    NEXT_CROSSCHECK: { to: role, role: crosscheck, extras: ["FEATURE_ID={feature}"] }
-    NEXT_UI_QA: { to: role, role: ui-qa, extras: ["FEATURE_ID={feature}"] }
-    # ── benign global / phase verbs → stop this pipeline cleanly ──
-    CONVERTED: { to: idle }
-    FEATURE_FREEZE: { to: idle }
-    READY_FOR_PROD: { to: idle }
-    RUN_TESTS: { to: idle }
-    # ── global-only verbs the per-feature pipeline deliberately does not run ──
-    NEXT_HARNESS: { to: unsupported }
-    NEXT_WORKER_CEO_MODE: { to: unsupported }
 
-# The Level-2 runtime DAG: plans→features import (waves + blocked_by parallelism).
 planner:
-  kind: features-import
+  kind: inline
 
 roles:
-  - { id: director, description: "Per-feature orchestrator; emits the next decision verb." }
-  - { id: scoper }
-  - { id: architect }
-  - { id: worker }
-  - { id: validator }
-  # NOTE: `reviewer` ships/returns at the PR gate, NOT via a per-feature director
-  # verb — it's modeled as an approval gate (gates.approvals), not a spine role.
-  - { id: debugger, reactive: true, description: "Read-only debugger fired before a worker retry." }
-  - { id: documenter }
-  - { id: curator }
-  # Opt-in quality roles — dispatched only when the harness opts in (dormant by
-  # default). Declared so the spine's NEXT_SECURITY / NEXT_CROSSCHECK / NEXT_UI_QA
-  # edges resolve to a real prompt.
-  - { id: security-reviewer, reactive: true }
-  - { id: crosscheck, reactive: true }
-  - { id: ui-qa, reactive: true }
-
-# Reactive overlay (layer 3): the debugger-before-worker gate. Fires before a
-# worker dispatch once attempts ≥ threshold and no debug note exists yet (read-only,
-# does not preempt). The threshold knob is `knobs.debuggerThreshold`.
-reactive:
-  - role: debugger
-    when: { beforeRole: worker, minAttempts: 3, unless: debug-note }
-    preempt: false
-
-# Gates: the finalize recipe. DONE → curator → postCuratorOutputs → documenter →
-# (archive); ESCALATE → curator. unify-agent-launches-as-blueprints P-007: this
-# recipe is now the DECLARATIVE source planFinalization resolves (was a hardcoded
-# constant) — postCuratorOutputs is listed explicitly (it always ran after curator).
-gates:
-  finalize:
-    onDone: [curator, postCuratorOutputs, documenter, archive]
-    onEscalate: [curator]
-
-# Per-blueprint gym config: coding collects its trace from the substrate git diff
-# (the D-015 collectTrace seam). Signals are the deterministic guardrails.
-gym:
-  collectTrace: git-diff
-  signals: [regressionsFromTests, plantedBugCaught]
-  rubric:
-    version: v1
-    model: claude-opus-4-8
-    weights: { d1: 0.5, d2: 0.25, d3: 0.25 }
+  - id: operator
+    description: >-
+      The operator in charge: survey the fleet, decide what matters, create or
+      supervise harnesses from blueprints, surface curated reports, and declare
+      the next wake before ending the turn.
+  - id: mug
+    description: >-
+      The Queen — specialized placement decider for the hive. Surveys the work
+      frontier and bee load, ranks tasks, picks a placement for each (free slot /
+      graceful-evict+fresh / warm-inject), attaches situational briefs, and
+      declares the next wake. Proposes placement; bees dispose (own their actual
+      sequencing). (local-hive P-030/P-031/P-032)
 
 knobs:
-  harnessKind: coding
+  harnessKind: hive
+  # CODING hives MUST be backed by a git repo (per-hive-git-and-release-gate-2026-06-29
+  # D-002). hive:create enforces this — clone an existing repo or init a fresh one;
+  # a repo-less coding hive is rejected (hive_requires_repo). The non-coding `work`
+  # blueprint (extends coding) RE-SETS this false — there the repo is opt-in backup.
   requiresRepo: true
-  debuggerThreshold: 3
+  # Staging→main green gate (D-001/D-002). enabled ⇒ green-checkpoint runs greenCmd
+  # in an isolated <slug>-checkpoint checkout and fast-forwards `main` (releaseRef)
+  # from `staging` (integrationBranch) only when green. greenCmd:null ⇒ default to
+  # the `testCommand` knob (auto-detected by harness:generate-from-repo), else
+  # build/typecheck — the SAME command the worker/gym run (D-004). deploy:null ⇒
+  # green-gate only; set deploy to opt into auto-deploy (leg 3).
+  releaseGate:
+    enabled: true
+    integrationBranch: staging
+    releaseRef: main
+    greenCmd: null
+    deploy: null
 
-# Coding-specific declared tunables (P-006 / D-003) — these UNION with base's
-# universal params (Dispatch / Backend) when the settings UI introspects a coding
-# harness. KEYED BY config.json instance path (the namespace the settings panel
-# persists). The worker/typecheck/debugger knobs are coding-ONLY (a research/gym
-# harness has its own), which is exactly why HarnessSettingsPanel's old hardcoding
-# of them didn't generalize. `default` carries the runtime default (lanes.ts /
-# the panel) since these have no blueprint-knob default.
-params:
-  "debugger.threshold":
-    label: Debugger gate threshold
-    type: number
-    min: 1
-    max: 20
-    default: 3
-    group: Workers
-    affects: reactive debugger-before-worker gate (fires at attempts ≥ n)
-    description: >-
-      After this many failed worker attempts, a read-only debugger runs before the
-      next worker retry.
-  "parallelWorkers.useChunkLoop":
-    label: Use chunk loop
-    type: boolean
-    default: true
-    group: Workers
-    affects: worker execution model (per-chunk file locks + a typecheck gate)
-    description: Run the worker as a chunked loop (vs a single pass).
-  "parallelWorkers.workingStateCheck":
-    label: Working-state check command
-    type: string
-    default: pnpm typecheck
-    group: Workers
-    affects: worker gate — the command run after each chunk's edits
-    description: >-
-      Shell command the worker runs to verify a working state between chunks.
-  "parallelWorkers.replanStrikes":
-    label: Replan strikes
-    type: number
-    min: 1
-    max: 20
-    default: 3
-    group: Workers
-    affects: worker chunk loop — working-state failures before escalating
-    description: How many working-state-check failures before the chunk loop escalates.
-  "parallelWorkers.escalateToRole":
-    label: Escalate to role
-    type: string
-    default: debugger
-    group: Workers
-    affects: worker chunk loop — the role taken over after the strike limit
-    description: The agent role the chunk loop hands off to after the strike limit.
+# Knowledge: a fresh coding pot seeds the generic `coding` knowledge pack
+# (domain-generic-hive-architecture-2026-06-18 P-017, D-010) — generic
+# engineering wisdom carried as discovery rules, NOT project-specific (project
+# specifics ride the per-pot override + a separate project pack, never the
+# blueprint). pot:create reads knowledge.pack as the default seed when the
+# caller passes no explicit pack. (Renamed from `learning.pack` in
+# cupboard-public-release-2026-07-12 P-001 — the learning LOOPS keep the
+# `learning:` block; loop provisioning stays flag-gated in createHiveHarness
+# (PER_HIVE_LEARNING_LOOPS), so no `loops` key here.)
+knowledge:
+  pack: coding
 
-# The build/run environment spec — "what to stand up on a frame"
-# (cloud-deployment-layer-2026-06-06 P-007). First-class + placement-agnostic: the
-# SHAPE is identical local vs cloud. Empty here by design — a coding harness's
-# actual build/test/run commands are PER-REPO, detected by harness:generate-from-repo
-# (which already sets knobs.testCommand) or set per instance, NOT hardcoded across
-# every coding harness. The deployment driver's install() reads the resolved spec to
-# bootstrap a cloud frame; empty arrays ⇒ nothing to stand up (today's local behavior).
-environment:
-  setup: [] # one-time machine setup (toolchains) — e.g. ["nvm install 22"]
-  install: [] # dependency install — e.g. ["npm ci"]
-  build: [] # build — e.g. ["npm run build"]
-  test: [] # test command(s) — usually mirrors knobs.testCommand
-  run: [] # long-running app/dev-server start — e.g. ["npm run dev"]
-  services: [] # background services (DB/cache) — {name, command, port?, healthcheck?}
-  ports: [] # ports the frame must expose
-  env: {} # NON-SECRET env vars (secrets ride deployment.credentialRef)
+# NO `triggers.schedule` — deliberately. The hive's wake is SELF-DECLARED
+# (hive:declare-wake writes the one-shot `hive-wake` routine / event-reaction
+# subscriptions; hive:wake is the manual fire). A cadence here would reintroduce
+# the timer loop D-002 removes.
 
-# Tool/plugin dependencies (official-blueprints-cupboard-publish-2026-06-05
-# D-002): what this blueprint's roles actually call, derived from the role
-# personas (scripts/derive-blueprint-deps.mjs) + validated against the live
-# catalog. The import-time dep-validator (harness:create / init --from /
-# cupboard install-blueprint) resolves these UPFRONT — a missing tool fails
-# with "needs tool X" instead of a mid-run unknown_tool. NOTE: extends-merge
-# REPLACES arrays, so a child declaring its own dependencies.tools replaces
-# this list wholesale (re-declare the full set).
+# Dependencies (official-blueprints-cupboard-publish D-002): the operator-level
+# blackboard survey surface, harness create/supervise, placement tools (Queen role),
+# and self-declared wake. Queen-specific tools: curation:change-feed (the rolled-up
+# completion feed the steering loop reads — B7) + work_items:set_priority (set the
+# BACKLOG order the fleet claims against — the steer-don't-dispatch lever),
+# fleet:assignments (bee load/lists), work_items:reorder (per-bee work-list rank),
+# coord:send with wake (warm-inject), fleet:spawn (free-slot placement).
 dependencies:
   tools:
+    - activity:recent
     - agent_tools:list
-    - artifacts:append
-    - artifacts:load
-    - artifacts:save
-    - audit:list
-    - coord:ask
-    - docs:get
-    - docs:outline
-    - docs:search
-    - features:get
-    - features:history
-    - features:list_related
-    - features:tag_vocabulary
-    - goals:get
+    - blueprint:catalog
+    - blueprint:extend
+    - blueprint:validate
+    - chat:ask_choice
+    # The autonomy decider gate (queen-autonomy-policy B-12 / P-070): per queue
+    # item, auto (decide without asking) vs gated (→ the owner Queue), with the
+    # reasons. Behavior-neutral (always gated) until the owner arms (P-092).
+    - autonomy:decide
+    # Queen-weighting read (self-learning-frontier P-045 / FB-19, D-005):
+    # per-persona Brier trust weights for weighing claimed confidence while
+    # triaging the ranked improvement queue.
+    - calibration:summary
+    - coord:inbox
+    - coord:presence
+    - coord:send
+    # queen.base.md's cold-wake identity check: the queen CALLS coord:whoami to
+    # verify her hive/scope before trusting a carry-note — dark-tools guard.
+    - coord:whoami
+    - curation:change-feed
+    - curation:feed
+    - deploy:harness
+    - deploy:pot
+    - deploy:status
+    - discovery:pots
+    # Durable-facts fold (queen.base.md steering loop): the queen CALLS facts:assert
+    # for standing conclusions and facts:retract when one stops being true —
+    # blueprint-prompt-dark-tools guard.
+    - facts:assert
+    - facts:retract
+    - fleet:assignments
+    # The Queen's source-side read of the shared inference-capacity oracle — the
+    # queen.base.md placement loop CALLS it each cycle to size the batch (Pass
+    # fleet:capacity { headroom } → fleet:place_batch). Was a dark tool (referenced
+    # in-prompt, absent from deps) — blueprint-prompt-dark-tools guard.
+    - fleet:capacity
+    - fleet:drain
+    # One-wake BATCH placement (queen-autonomous-execution B-07): ranks the ready
+    # frontier task↔bee by affinity, then fans spawn + warm-inject across the fleet
+    # in a single call — the serial placement loop collapsed.
+    - fleet:place_batch
+    # (cup:spawn removed by P-059 — retired with the Mug/Kettle/Cup tier.)
+    - harness:create
     - harness:escalation
-    - harness:markdown_index
+    - harness:get
+    - harness:list
     - harness:pending_reviews
-    - harness:phase_path
-    - issues:claim
-    - issues:create
+    - harness:status
+    - improvements:digest
+    - improvements:resolve
+    - improvements:triage
+    - inbox:triage
+    - memory:forget
     - memory:search
-    - messages:inbox
-    - messages:send
-    - plans:add-decision
-    - plans:add-item
-    - plans:get
-    - plans:items
-    - plans:new
-    - plans:promote
-    - plans:set-content
-    - plans:set-importance
-    - plans:set-now
-    - topics:feed
-    - topics:list
-    - topics:subscribe
-    - topics:tag
+    - memory:update
+    # mug.base.md PRESCRIBES the call, twice: "use `plans:start` for a policy-free
+    # Scout draft" and "start a policy-free Scout draft with `plans:start`". It is
+    # the approval route for a policy-free draft — plans:promote explicitly is not
+    # (it needs a `## Promote` policy), which is why that sibling stays a
+    # mention-not-call entry while this one is granted. Was a dark tool:
+    # blueprint-prompt-dark-tools guard.
+    - plans:start
+    - pot:declare-wake
+    - pot:wake
+    # Owner steering controls (queen-steering-panel B-01): read what the owner has
+    # focused the Queen toward (get-steering); set/clear it from the owner surface
+    # (set-steering — writes the owner-steering:* hive_settings + wakes the Queen).
+    - pot:get-steering
+    - pot:set-steering
+    # Queen auto-grading of routed Scout ideas (scout-idea-grading-2026-06-12
+    # P-010 / D-004): grade ungraded routed drafts 1–5 while triaging.
+    - blender:grade-idea
+    # Hybrid bee-scheduler (hybrid-bee-scheduler-work-stealing-2026-06-22): steer
+    # each bee's claim via a versioned claim-spec + read the live-execution view —
+    # wired so queen.md's scheduler guidance is actually callable.
+    - scheduler:running
+    - scheduler:set_claim_spec
+    - search:fulltext
+    - search:semantic
+    - work_items:co_locate
     - work_items:list
+    - work_items:reorder
+    - work_items:set_priority
   plugins: []

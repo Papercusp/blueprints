@@ -30,9 +30,24 @@ workItem:
   idPrefix: IMP
 
 # Spine + planner (the single-role run-to-done shape) are inherited from the
-# `single-agent` parent; override only the decider role (worker).
+# `single-agent` parent; override the decider role (worker) and lift maxTurns.
+#
+# EI-7635/EI-7524 (2026-07-05): the inherited single-agent default (40) is
+# undersized for this role's actual contract (reproduce + fix + regression test +
+# `test:affected` + `improvements:resolve`). Live dispatch-ledger evidence across
+# multiple items (EI-7524, EI-7196, EI-7517, EI-7534 — all `worker-exit-backedge`,
+# exit 0, ~250-950s runtime, output cut off mid-verification e.g. "Now let me run
+# the affected suite to confirm nothing else broke.") shows the worker doing real,
+# correct work and then exiting cleanly one step before ever calling
+# `improvements:resolve` — the shape of hitting a turn ceiling near the finish
+# line, not a crash/timeout/env failure (those are already separately classified
+# and excluded from lane-breakage signaling). Charged as a real attempt AND
+# feeding the "auto-implement lane is broken" watchdog signal every time. Doubling
+# to 80 (matching the `bee` blueprint's budget) gives real headroom for the final
+# verify+resolve steps without approaching the heavier multi-role budgets (200).
 spine:
   decider: worker
+  maxTurns: 80
 
 roles:
   - id: worker
@@ -44,6 +59,16 @@ roles:
       would touch operator-core safety / the deploy machinery / a migration.
       Prompt: blueprints/implement/prompts/worker.md (blueprint-owned, resolved
       via BLUEPRINT_ID=implement — close-the-self-improvement-loop D-001).
+
+# Per-blueprint gym config (self-learning-frontier P-048 / FB-23): the implement
+# worker is a registered learning-system gym target, judged on DRILL ground truth —
+# red-queen's planted frictions (drillResolveRate / drillMttsh read the drill
+# corpus's known answers; lib/gym/drill-signals.ts) plus the standard regression
+# guardrail. Trace = the fix diff (it is a coding role). Dark until P-001 arming:
+# the autoloop row registerLearningGymTargets creates is disabled + unbudgeted.
+gym:
+  collectTrace: git-diff
+  signals: [regressionsFromTests, drillResolveRate, drillMttsh]
 
 knobs:
   harnessKind: implement
@@ -71,13 +96,13 @@ dependencies:
     - harness:phase_path
     - improvements:capture
     - improvements:resolve
-    - issues:claim
-    - issues:create
-    - issues:get
-    - messages:inbox
-    - messages:send
+    - work_items:claim
+    - work_items:create
+    - work_items:get
+    - work_items:comment
+    - session:request-compaction
     - topics:feed
     - topics:list
-    - topics:subscribe
+    - watch:create
     - work_items:list
   plugins: []

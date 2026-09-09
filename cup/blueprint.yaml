@@ -28,6 +28,29 @@ description: >-
   chunk, no spine); the brief rides `extras`, the persona is prompts/cup.md. A cup is
   kind:'harness' (NOT a pot).
 
+# Structured retirement (WI-5645 no-retirement-launch-guard, applied by
+# retire-mug-kettle-su-only-2026-08-09 P-062). Before this field existed
+# "retired" was ONLY human-readable prose, so nothing checked it before spending
+# (EI-18177667809538623: an autoloop spent $14.51+ against the retired
+# `coding-factory` via a descendant that inherited it). `blueprintRetirement()`
+# reads this at the LAUNCH/SPEND chokepoints; the pure loader still resolves it
+# so the catalog can SHOW it as retired rather than erroring.
+#
+# This is the second, independent lock on the same door: `cup` is already
+# unspawnable at all three role-admission doors (RETIRED_TIER_ROLES via
+# `isRetiredTierRole`, D-018/D-022). That guard refuses a role NAME; this one
+# refuses the BLUEPRINT. Either alone would leave the other path arguable.
+#
+# To revive (the flag is `case:'cutover'` — reversibility is the point): delete
+# this block AND flip `FLAGS.MUG_KETTLE_SYSTEM` ON.
+retired:
+  at: "2026-08-09"
+  reason: >-
+    The Mug/Kettle/Cup tier is retired — su + GOAL mode are the only way to drive
+    the app (retire-mug-kettle-su-only-2026-08-09, D-020, owner-directed). This
+    blueprint exists solely to launch the `cup` role, which no longer admits at
+    any spawn door. Do not wire new work to it or to any blueprint extending it.
+
 # The work the cup is placed onto. Generic: a cup is given tasks, not a typed
 # pipeline feature — `kind:'task'` is the plain "do this" work unit.
 workItem:

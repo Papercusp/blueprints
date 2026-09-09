@@ -20,6 +20,18 @@
 # own — only the *target* sub-harness clones a repo (and only when the target's
 # blueprint is `requiresRepo:true`). So `requiresRepo:false` here, which also makes
 # the gym a live exercise of the work-item-output collectTrace path (P-014).
+#
+# TWO EXECUTION PATHS — by design, NOT a migration gap (deterministic-blueprints-
+# migration-2026-06-13 D-014, scoped):
+#   - SUPERVISED / agent-authored runs go through THIS spine (the durable
+#     featurePipelineWorkflow + gym-director decider + role dispatch) — proven in
+#     gym-pipeline.test.ts + the blueprint-cycle-run.ts CLI.
+#   - The LIVE UNATTENDED autoloop (the `system:gym-cycle` workspace-singleton pulse,
+#     D-010) runs the cheap DETERMINISTIC loop `lib/gym/loop.ts:runOptimizationLoop`
+#     directly (via autoloop-cycle.ts) — agent-dispatch per 30-min cycle would be
+#     wasteful. So the spine below is the gym's SHAPE/vocabulary; the imperative loop
+#     is the production executor. Do NOT "reconcile" them into one path — it would
+#     lose the loop's deterministic closure (the scoping verdict was leave-as-is).
 id: gym
 extends: base
 version: 0.1.0

@@ -10,19 +10,23 @@
 # variant (D-010: research inline by default; the sub-harness only on overflow),
 # left disabled here so the minimal blueprint is as cheap as the maximal.
 #
-# Work-item storage: a research-task rides the existing per-harness work-item
-# table (harness_features today; generalized to work_items in P-020). The roles
-# read/write it via the same FEATURE_ID mechanism the coding pipeline uses — that
-# reuse is the point: only the blueprint (spine + roles) differs.
+# Work-item storage: a research task rides the existing work_items table. The
+# roles read/write it via the same FEATURE_ID mechanism the coding pipeline uses
+# — that reuse is the point: only the blueprint (spine + roles) differs.
+#
+# Kind: `task` (WI-2874, 2026-07-05). The old feature-family `research-task` kind
+# was MERGED INTO the issue-family `task` — research is non-code work, which is
+# what `task` now means — so this blueprint's output rides the `task` kind. (The
+# live deep-analysis lane, sentinel-deep-delegate, likewise mints `task`.)
 id: research
 extends: base
 version: 0.1.0
 description: >-
   A minimal research harness: a research-director drives a single researcher per
-  research-task, with searcher/verifier as reactive helpers. Repo-less.
+  research task, with searcher/verifier as reactive helpers. Repo-less.
 
 workItem:
-  kind: research-task
+  kind: task
   idPrefix: R
 
 # The autoloop dispatch policy (autoloop-pot-operator-rebuild-2026-06-05 D-005):

@@ -6,8 +6,13 @@
 # parent in an `extends` merge). Concrete blueprints (`coding`, `research`, …)
 # `extends: base` and supply the runnable shape.
 #
-# Inheritance/merge semantics (the loader): objects deep-merge (child wins on
-# leaf keys); arrays and scalars are replaced wholesale by the child.
+# Inheritance/merge semantics (the loader, identities-v1-2026-08-30 P-019): each
+# schema leaf composes by the rule `merge-rules.ts` declares for it — by default
+# objects deep-merge and arrays/scalars are replaced by the child; declaration
+# sets (roles, slots, bundles, grants, reactive, gym.signals, dependencies.*)
+# UNION across the stack, and the safety caps (spine.maxTurns, knobs.maxCostUsd,
+# parallelWorkers.max/maxFeaturesInFlight, dispatch.costCapUsd/safetyCeiling,
+# recursion.maxDepth) take the TIGHTER value regardless of order.
 id: base
 version: 0.1.0
 description: >-
@@ -18,6 +23,19 @@ knobs:
   logRetention: 500
   branchIsolation: { enabled: false }
   worktrees: { enabled: false }
+  # Doc-integrity primitive (owner 2026-06-22) — the TWIN of git-sync: every harness
+  # that `extends: base` inherits doc-drift tracking automatically, so a NEW hive
+  # (e.g. from the `coding` blueprint) is doc-honest FROM BIRTH with zero per-hive
+  # setup. `track: true` (default) means: at harness:create, SEED the repo's existing
+  # docs as tracked records, and let the post-sync freshness sweep self-bootstrap a
+  # newly-touched doc. `track: false` opts a harness out. WHERE the docs live is the
+  # existing docsRoot resolution — `<repo>/docs`, or a `.papercusp/docs.json` override
+  # (e.g. Papercusp points it at apps/operator-docs) — NOT re-declared here. Both the
+  # seed and the sweep reuse anchorManualDoc + resolveHarnessDocPaths. Plans:
+  # deterministic-commit-workitem-attribution-2026-06-22 +
+  # docs-corpus-audit-and-engine-improvements-2026-06-20 (WS2).
+  docs:
+    track: true
 
 # Declared UI-introspectable tunables (psu-isolation-and-blueprint-aware-harness-ui
 # P-006 / D-003 / D-007). The UNIVERSAL params every harness shows, KEYED BY DOT-PATH
@@ -45,7 +63,21 @@ params:
     affects: every role's agent invocation (the default backend)
     description: >-
       Default model id for this harness's agents (a role can override). e.g.
-      claude-opus-4-8.
+      claude-opus-5.
+  "aiBackend.default.engine":
+    label: Agent execution engine
+    type: enum
+    default: subprocess
+    options:
+      - value: subprocess
+        label: Subprocess CLI
+      - value: loop
+        label: Papercusp owned loop
+    group: Backend
+    affects: every role's agent invocation (a role can override)
+    description: >-
+      Selects the execution engine independently of the provider/backend. The owned
+      loop is operator-hosted; subprocess keeps the Claude Code, OMP, or Codex CLI lane.
   "aiBackend.default.agentCmd":
     label: Agent command
     type: string
