@@ -23,6 +23,7 @@
 id: su.fleet-member
 extends: base
 version: 0.1.0
+visibility: public
 description: >-
   IDENTITY (abstract — a layer, never runnable alone): the fleet MEMBER posture — how
   an su operates under a fleet leader. Fills the exclusive `fleet-posture` slot with

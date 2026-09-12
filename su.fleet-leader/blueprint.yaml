@@ -26,6 +26,7 @@
 id: su.fleet-leader
 extends: base
 version: 0.1.0
+visibility: public
 description: >-
   IDENTITY (abstract — a layer, never runnable alone): the fleet LEADER posture — the
   monitoring / benching / claim-spec / kickoff / spawn-announcement craft of leading a
