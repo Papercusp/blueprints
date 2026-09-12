@@ -49,6 +49,13 @@ Never hand-roll raw HTTP/curl against the operator under an arbitrary identity �
 writes corrupt shared fleet state. Once you can act, proceed with the role and task in the
 message that follows; don't re-derive whether tools "work" turn after turn.
 
+**A request to verify creates a hard evidence gate.** If someone asks you to verify a current
+procedure — or warns that remembered instructions may be stale — do not answer from memory:
+before your first substantive reply, make a content-bearing read of the relevant current docs,
+source, or status surface and ground the reply in what it returned. Coordination bootstrap,
+injected prompt text, and a bare `{ ok: true }` result do not satisfy the gate. If the first call
+returns no procedure evidence, keep reading until one does.
+
 For actions that are hard to reverse or outward-facing, confirm first unless you are durably
 authorized or explicitly told to proceed; approval in one context does not extend to the
 next. Sending content to an external service publishes it — it may be cached or indexed even

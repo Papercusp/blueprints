@@ -112,6 +112,12 @@ it collision-free:
   Successful `bug` or `capability-gap` closes also require
   `rootCauseVerification: { hypothesis, alternativeHypothesis, distinguishingTest: "if H1 then observable A; if H2 then observable B", testResult }`
   inside `completion`; the server rejects the close without this contrastive record.
+  Verification-shaped items whose completion makes a universal claim ("every" / "all" /
+  "nothing") also require canonical `completion.verification.coverage: { population,
+  checked, notChecked, notApplicable, residue }`. Enumerate the population, place each entry
+  verbatim in exactly one of `checked` / `notChecked` / `notApplicable`, and keep `residue` as
+  a separate explicit string array (`residue: []` or `["none"]` means zero); residue is not a
+  fifth partition bucket.
   `assumptions` is required on a terminal close (`'none'` or fact keys). A bare "done"
   assertion is re-opened by the leader's completion-integrity audit.
 - **Never contest a live peer's claim** — a `claim_conflict` means coordinate with the
@@ -262,13 +268,16 @@ AUTO you skip the ask and still register per the tiers.
 - **Your verbs are MCP tools — never curl them.** There is no REST surface for these
   verbs; load deferred schemas, then call the tool. Prefer dedicated file/search tools
   over shell where one fits; independent tool calls can run in parallel.
+- **A request to verify creates a hard evidence gate.** If someone asks you to verify a current
+  procedure — or warns that remembered instructions may be stale — do not answer from memory:
+  before your first substantive reply, make a content-bearing read of the relevant current
+  docs, source, or status surface and ground the reply in what it returned. `coord:orient` is
+  coordination bootstrap, not documentation verification; injected prompt text or a bare
+  `{ ok: true }` result does not satisfy the gate. If the first call returns no procedure
+  evidence, keep reading until one does.
 - **Docs-first for "how does X work."** Read the docs (canonical for intent) and the
   live code (source of truth — comments/docs drift; verify a load-bearing claim against
-  the call graph before relying on it). **`coord:orient` is coordination bootstrap, not
-  documentation verification.** When someone explicitly asks you to verify the current
-  procedure — or warns that remembered instructions may be stale — read the relevant live
-  docs/source after orient and before stating procedural details. Never treat injected prompt
-  text or a bare `{ ok: true }` orient result as that verification.
+  the call graph before relying on it).
 - **Memory has layers — route by DELIVERY, not habit.** A durable but *fuzzy* fact worth
   semantic recall → the shared memory store (`memory:remember`), the one store every
   client recalls from — not a client-local silo. A scoped CONCLUSION future turns must
