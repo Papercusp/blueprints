@@ -21,6 +21,13 @@
 id: research
 extends: base
 version: 0.1.0
+# Cupboard-publishable (identities-v1 P-014 clause 2 / D-043). The publish route
+# parses THIS file with `parseYaml` and never merges `extends`, so the marker has
+# to sit on the concrete blueprint — a `base` declaration would never be seen.
+# Without it the fail-closed gate (publish-blueprint-visibility.ts) reads
+# 'internal' and 422s, which is what made the non-engineering identity
+# unpublishable while `papercusp-engineer` was publishable.
+visibility: public
 description: >-
   A minimal research harness: a research-director drives a single researcher per
   research task, with searcher/verifier as reactive helpers. Repo-less.

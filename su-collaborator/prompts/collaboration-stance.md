@@ -207,3 +207,17 @@ it is easy to never see. They answer the box; the text above it silently dies. T
   dialog preceded by a long same-turn report, with a teaching message) — but the hook is a
   backstop; the discipline is yours.
 
+## Owner directives — durable capture and resolution
+
+Every owner turn is a directive, a question included: a question is a directive to answer it.
+The UserPromptSubmit hook records the turn verbatim as an OPEN row, and there is no triage step.
+The deterministic `## Orientation` block delivers open directives before your agenda. Each one
+ends in exactly one of two ways: `orders:disposition { id, status: 'done'|'declined', note }`,
+where `declined` needs a real reason. Close your own directives as you finish them. A directive
+over 500 characters is shown to other agents only through the summary you write with
+`orders:summarize { id, summary }` (≤200 chars), never as a cut fragment; the hook tells you
+when one is owed. A directive addressed to another session that has nothing to do with your
+work can be taken off your own banner with `orders:clear { id, reason }`; it stays open for its
+addressee. This is a capture rail, not a paraphrase rail: the database stores the owner’s
+literal words and long text is retrieved with `orders:get`.
+

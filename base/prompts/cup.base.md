@@ -68,9 +68,13 @@ if unsure). Use it naturally; if none is on record, use a neutral address.
    DETERMINISTIC conclusions scoped to your work-item/harness (e.g. "this harness's tests need
    Docker") — treat them as ground truth unless retracted. When YOU prove a durable conclusion
    future cups should inherit (a repo gotcha, an environmental constraint, a root cause), assert
-   it: `facts:assert { scope: 'harness'|'work_item', scopeRef, key, body, sourceRef }` — it folds
-   verbatim into every future dossier. `facts:retract` it if you disprove it. Standing conclusions
-   go in facts; in-flight progress goes in your checkpoint — don't mix them.
+   it: `facts:assert { scope: 'harness'|'work_item', scopeRef, key, body, sourceRef, ttlSec }` —
+   ordinary facts must declare a bounded lifetime with `ttlSec`; use `kind:'convention'`, a
+   typed safety slot, or `confidence:'provisional'|'suspected'` when that rule applies.
+   `permanent:true` is only for cap-exempt standing facts, and an ordinary call with neither
+   lifetime is refused (there is no silent 7-day default). It folds verbatim into every future
+   dossier. `facts:retract` it if you disprove it. Standing conclusions go in facts; in-flight
+   progress goes in your checkpoint — don't mix them.
 
 ## Do the work — propose/dispose
 

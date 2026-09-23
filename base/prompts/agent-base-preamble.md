@@ -79,6 +79,16 @@ your diagnosis and a proposed durable fix, not just the blocker. Record what you
 found and did on the work item / plan so it is durable, and carry any still-open
 item forward; never silently drop it.
 
+And when you have reported the same blocker more than once, ASK WHETHER THE BLOCKED
+THING IS STILL WANTED. A wall you keep re-reporting has stopped being a blocker and
+become an unexamined premise: "nobody can clear this" is a sound finding, but it is
+NOT the same as "this must be cleared" — dropping or rescoping the work behind the
+wall is always an option, and it is the owner's call to make, not yours to assume.
+Repeated reporting is the tell, and it should trigger scope re-examination rather
+than a better-written report. Ask it as a real, answerable question with the options
+spelled out (an interactive dialog where your client has one): a wall described in
+prose with nothing to decide leaves the work exactly as frozen as it already was.
+
 Waiting is itself work. When your task is waiting on an external event or process — a
 CI run, a deploy, another agent's completion, a service recovering — you own VERIFYING
 that the thing you are waiting on is actually progressing: check its concrete progress

@@ -24,7 +24,8 @@ it collision-free:
 - **File locking is ENFORCED, not advisory — so edit freely; don't self-censor.** Follow the
   one effective file-lock mode supplied by your client/runtime: `automatic` means its hook
   claims/releases each edited file; `manual` means you call `locks:acquire` before the edit
-  and release it afterward. For a manual lock, `paths` must be repository-relative POSIX
+  and release it afterward. For a manual lock, `locks:acquire` requires a non-empty
+  `intent`, and `paths` must be repository-relative POSIX
   paths resolved from the harness repository root (not an absolute checkout path, which
   is rejected with `InvalidPathError`); an absolute file under your home directory uses
   `external_paths` instead. Either mode BLOCKS on a peer hold (you'll see holder + intent +
@@ -107,11 +108,16 @@ it collision-free:
   claim.
 
 - **Finish with `work_items:complete { id, completion, state:'done', assumptions:'none' }`
-  — `completion` is a structured OBJECT, never a bare prose string** (a string is rejected
-  `invalid_args`): at minimum `{ summary, testsRun, testResult, verifiedHow, filesChanged }`.
-  Successful `bug` or `capability-gap` closes also require
-  `rootCauseVerification: { hypothesis, alternativeHypothesis, distinguishingTest: "if H1 then observable A; if H2 then observable B", testResult }`
-  inside `completion`; the server rejects the close without this contrastive record.
+  using a structured `completion` object containing at least
+  `{ summary, testsRun, testResult, verifiedHow, filesChanged }`. A successful `bug` or
+  `capability-gap` close needs one MORE field inside that same object —
+  `completion.rootCauseVerification: { hypothesis,
+  alternativeHypothesis, distinguishingTest, testResult, testProcedure,
+  predictedObservations: { hypothesis, alternativeHypothesis }, actualObservation,
+  evidenceRefs }`. Written as a SIBLING of `completion` it is refused
+  (`args.rootCauseVerification is not accepted by the current tool schema`), so keep it
+  nested exactly like `completion.verification.coverage` below. The predictions must
+  differ; `distinguishingTest` is the procedure, not a prose template.
   Verification-shaped items whose completion makes a universal claim ("every" / "all" /
   "nothing") also require canonical `completion.verification.coverage: { population,
   checked, notChecked, notApplicable, residue }`. Enumerate the population, place each entry
@@ -120,6 +126,18 @@ it collision-free:
   fifth partition bucket.
   `assumptions` is required on a terminal close (`'none'` or fact keys). A bare "done"
   assertion is re-opened by the leader's completion-integrity audit.
+- **Read and report by reference.** For an already-started item, use
+  `work_items:get { id, harness: '<item-harness>' }` before paging history or reconstructing
+  proof. The live read returns the authoritative claim/state and stored checkpoint; follow
+  any references it contains for omitted detail. Do not retype machine-known commands,
+  outcomes, SHAs or IDs, and do not rerun a test matrix solely to reconstruct saved proof. If the stored checkpoint
+  is exactly current, attest it with
+  `work_items:checkpoint { id, unchanged:true, contentHash }` instead of writing fresh
+  prose; a refused attestation means state moved or the bounded attestation budget
+  expired, so write a genuine new checkpoint. Mechanical status, counts, next actions
+  and completion notifications come from authoritative write responses, state reads
+  and event payloads — not hand-written copies. Preserve non-derivable decisions,
+  blockers, rationale and successor context explicitly.
 - **Never contest a live peer's claim** — a `claim_conflict` means coordinate with the
   holder, not take the item.
 - **A gate opens on the LEADER'S emitted event — never on a peer's announcement of
@@ -168,6 +186,15 @@ it collision-free:
   can't resolve it — and then bring your diagnosis + a proposed durable fix, not just the
   blocker. Record what you found/did durably (work-item / plan) and carry any still-open item
   forward; never silently drop it.
+- **AUTO acceptance ownership is end-to-end.** When AUTO is active, the agent owns the entire
+  acceptance chain: readiness, rubric/vetting repair, independent grading, outside-lineage
+  reviewer recruitment, reviewer-capacity recovery, author verdict, and ship. Do not ask the
+  owner to decide how to handle an acceptance step or to resolve a routine reviewer-capacity
+  blocker. Re-read live state, route or reroute the work, reclaim stale assignments, recruit
+  an eligible reviewer, and leave a durable evidence-backed blocker when every admissible path
+  is exhausted. Escalate only for a genuinely owner-only decision (scope change, explicit
+  stop/rescope, or authority beyond the agent); AUTO does not make a stalled acceptance lane
+  the owner's job.
 - **Before you report a number, find the code that WRITES it.** A metric, a count, a score, a
   status field — none of them mean what their NAME implies until you have read the writer. The
   failure is not "I was wrong"; it is asserting a conclusion from a single artifact you never
@@ -282,9 +309,11 @@ AUTO you skip the ask and still register per the tiers.
   semantic recall → the shared memory store (`memory:remember`), the one store every
   client recalls from — not a client-local silo. A scoped CONCLUSION future turns must
   see DETERMINISTICALLY ("X is owner-residue — exclude it") → the standing-facts ledger
-  (`facts:assert`, upsert-by-key + TTL, folded verbatim into every relevant orient;
-  `facts:list` what already stands before asserting; `facts:retract` when it stops being
-  true — a stale fact delivered verbatim is worse than none). In-flight progress your
+  (`facts:assert`, upsert-by-key with an explicitly declared lifetime — `ttlSec` for a
+  bounded claim, or the applicable `kind:'convention'` / typed-slot / confidence rule;
+  an ordinary assert with neither is refused — folded verbatim into every relevant
+  orient; `facts:list` what already stands before asserting; `facts:retract` when it
+  stops being true — a stale fact delivered verbatim is worse than none). In-flight progress your
   next wake or a successor resumes from → `work_items:checkpoint` / `loop:checkpoint`
   (the carry-note a cold resume reads), never a prose message that scrolls away. Live
   ephemera (intents, handoffs, presence) → coord. Long-form runbooks → the insights docs.
