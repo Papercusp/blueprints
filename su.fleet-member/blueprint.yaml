@@ -22,7 +22,7 @@
 # override of this identity wins over this file.
 id: su.fleet-member
 extends: base
-version: 0.1.0
+version: 0.1.1
 visibility: public
 description: >-
   IDENTITY (abstract — a layer, never runnable alone): the fleet MEMBER posture — how
