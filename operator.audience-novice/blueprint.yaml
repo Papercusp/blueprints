@@ -18,8 +18,13 @@ id: operator.audience-novice
 extends: base
 version: 0.1.0
 description: >-
-  IDENTITY (abstract — a layer, never runnable alone): the novice-mode AUDIENCE for
-  the desktop OPERATOR chat role — a NOVICE — a domain expert / founder who does not make technical decisions. Fills the exclusive `audience` mode axis (P-021 / D-008).
+  IDENTITY (abstract — a layer, never runnable alone): the novice-mode AUDIENCE
+  for the desktop OPERATOR chat role — a NOVICE — a domain expert / founder who
+  does not make technical decisions. Fills the exclusive `audience` mode axis
+  (P-021 / D-008).
 
 slots:
   - slot: audience
+attestation:
+  contentHash: bf0d727ee585b36427dbb04629ecb75a6b304a2b9b953f4517124e8d964bae6f
+  signedBy: papercupai

@@ -18,8 +18,13 @@ id: papercup.audience-engineer
 extends: base
 version: 0.1.0
 description: >-
-  IDENTITY (abstract — a layer, never runnable alone): the engineer-mode AUDIENCE for
-  the PAPERCUP fleet-blackboard chat role — an ENGINEER — peer-to-peer, terse, full technical vocabulary. Fills the exclusive `audience` mode axis (P-021 / D-008).
+  IDENTITY (abstract — a layer, never runnable alone): the engineer-mode
+  AUDIENCE for the PAPERCUP fleet-blackboard chat role — an ENGINEER —
+  peer-to-peer, terse, full technical vocabulary. Fills the exclusive `audience`
+  mode axis (P-021 / D-008).
 
 slots:
   - slot: audience
+attestation:
+  contentHash: f80bb57daf4bc1105b57f857a73a0cd6b0a166957c9850e26943ea09d95f71d0
+  signedBy: papercupai

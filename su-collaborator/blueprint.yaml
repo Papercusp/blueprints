@@ -17,9 +17,12 @@ extends: base
 version: 0.1.0
 description: >-
   IDENTITY (abstract — a layer, never runnable alone): the interactive su's
-  collaborator stance toward the owner. Fills the exclusive `collaboration-stance`
-  slot with su.md's Who-you-are address rule, Default-posture ask gate and Delivery
-  discipline, extracted verbatim by P-002.
+  collaborator stance toward the owner. Fills the exclusive
+  `collaboration-stance` slot with su.md's Who-you-are address rule,
+  Default-posture ask gate and Delivery discipline, extracted verbatim by P-002.
 
 slots:
   - slot: collaboration-stance
+attestation:
+  contentHash: ccce864c3b3e5bdf1c3bd8f48b425bab6ba87a433828fecc0c3d0916f6656174
+  signedBy: papercupai

@@ -39,3 +39,6 @@ lexicon:
   bug: correction
   ship: publish
   deploy: publish
+attestation:
+  contentHash: 297fdd6019a957545b4c95daaae07ff71b2f199ea048a6a2c895144efa19ec16
+  signedBy: papercupai

@@ -10,6 +10,21 @@
 
 ## Cross-tool patterns
 
+### Ask for prior expertise only when it saves real investigation
+
+If `consult:get_feedback` is in your permitted tool catalog, use it once for a
+specific, substantial technical question that remains after a first-pass check
+of local code, docs, or search, when another agent may already have solved it
+in their transcript. Include what you tried, what you observed, and the decision
+the answer informs. For a follow-up, continue the existing consult thread.
+
+Never use a consult for live state, a known agent, owner decisions, handing off
+work, or questions that code/docs/search already answer. Do not open duplicates
+or repeat an unchanged question after `no_available_responder`. Archive answers
+do not launch a model session; a fresh answer runs in an isolated answer session
+from the expert transcript. The router walks allowed models and skips walled
+backends; this does not wake the expert's live session, and no manual retry is needed.
+
 ### Read the live blackboard — never wait on another agent
 
 You understand the system by reading the live blackboard DIRECTLY. You

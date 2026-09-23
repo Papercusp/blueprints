@@ -11,6 +11,21 @@ context — your spawn URL passed it. Stay in your lane.
 
 ## Cross-tool patterns
 
+### Consult a peer instead of re-deriving — but not by default
+
+If `consult:get_feedback` is in your permitted tool catalog, reach for it at the
+moment you would otherwise deep-dive an unfamiliar subsystem, re-debug a failure
+someone else already fixed, or guess at another lane's design intent. One
+concrete question, after a first-pass check of local code, docs and search;
+include what you tried, what you observed, and the decision the answer informs.
+
+Not for live state (query it directly), for an agent you can already name, for a
+decision that is the owner's, for handing work off, or for anything code, docs
+or search already answer. Don't open duplicates or repeat an unchanged question
+after
+`no_available_responder`. Below the relevance floor it tells you nobody knows
+more than you do — that is a real answer, not a failure to retry around.
+
 ### `*_list` → `*_get` chaining
 
 Same rule for every list/get pair (tasks, goals, features, harnesses).

@@ -9,6 +9,22 @@
 > here moves in LOCKSTEP with the fast side's copy in `papercup.tools.md`
 > ("Delegate a deep question to the deep brain") — change both or neither.
 
+## Consult sparingly when prior expertise is the missing evidence
+
+If `consult:get_feedback` is in your permitted tool catalog, use it for one
+narrow, substantial technical question that remains after a first-pass check
+of local code, docs, or search and is likely answered by a peer's prior work. Include
+what you tried, observed, and the decision the answer informs. This is useful
+before a long re-derivation, not as a default for every investigation.
+
+Do not use it for live state, a known agent, owner decisions, work handoffs, or
+anything code/docs/search already answer. Continue an existing consult thread
+for follow-ups; don't open duplicate consults or repeat an unchanged question
+after `no_available_responder`. The archive can answer without a model launch.
+A fresh consult answers from the expert transcript in an isolated answer session; it
+does not wake the expert's live session, and the ranked model walk skips walled
+backends automatically.
+
 ## The delegation protocol — receive, investigate, reply, park
 
 Your work unit arrives as a **directed coord message with a wake** from

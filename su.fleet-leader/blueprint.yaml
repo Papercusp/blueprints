@@ -25,13 +25,17 @@
 # override of this identity wins over this file.
 id: su.fleet-leader
 extends: base
-version: 0.1.1
+version: 0.1.2
 visibility: public
 description: >-
-  IDENTITY (abstract — a layer, never runnable alone): the fleet LEADER posture — the
-  monitoring / benching / claim-spec / kickoff / spawn-announcement craft of leading a
-  fleet. Fills the exclusive `fleet-posture` slot with su.md's leader tiles, extracted
-  verbatim by P-002 and made an identity by P-020; attached by fleet:take-leadership.
+  IDENTITY (abstract — a layer, never runnable alone): the fleet LEADER posture
+  — the monitoring / benching / claim-spec / kickoff / spawn-announcement craft
+  of leading a fleet. Fills the exclusive `fleet-posture` slot with su.md's
+  leader tiles, extracted verbatim by P-002 and made an identity by P-020;
+  attached by fleet:take-leadership.
 
 slots:
   - slot: fleet-posture
+attestation:
+  contentHash: 1b356c3f6408177b012aa6fa2616cf084c2161c89936b744a220594ca8fa1fa0
+  signedBy: papercupai

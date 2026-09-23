@@ -27,10 +27,13 @@ id: su.mode-auto
 extends: base
 version: 0.1.0
 description: >-
-  IDENTITY (abstract — a layer, never runnable alone): the AUTO mode definition — the
-  owner's standing "act, don't ask" grant read in the su's vocabulary. Fills the exclusive
-  `autonomy` mode axis; bound for `auto` and `cold-auto`; attached by mode:set, detached
-  on exit (P-021 / D-008).
+  IDENTITY (abstract — a layer, never runnable alone): the AUTO mode definition
+  — the owner's standing "act, don't ask" grant read in the su's vocabulary.
+  Fills the exclusive `autonomy` mode axis; bound for `auto` and `cold-auto`;
+  attached by mode:set, detached on exit (P-021 / D-008).
 
 slots:
   - slot: autonomy
+attestation:
+  contentHash: c00629ce2b45a78a12e47d202ca3160ea87fce78c891aa00c0d4fb01f017b497
+  signedBy: papercupai

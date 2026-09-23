@@ -18,8 +18,13 @@ id: operator.audience-engineer
 extends: base
 version: 0.1.0
 description: >-
-  IDENTITY (abstract — a layer, never runnable alone): the engineer-mode AUDIENCE for
-  the desktop OPERATOR chat role — an ENGINEER — peer-to-peer, terse, full technical vocabulary. Fills the exclusive `audience` mode axis (P-021 / D-008).
+  IDENTITY (abstract — a layer, never runnable alone): the engineer-mode
+  AUDIENCE for the desktop OPERATOR chat role — an ENGINEER — peer-to-peer,
+  terse, full technical vocabulary. Fills the exclusive `audience` mode axis
+  (P-021 / D-008).
 
 slots:
   - slot: audience
+attestation:
+  contentHash: ed9d3549adb4c2778ce08cee3ec4dc4059b022f1c88fd2113255e5add6201b28
+  signedBy: papercupai

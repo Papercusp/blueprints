@@ -10,6 +10,22 @@
 
 ## Cross-tool patterns
 
+### Consult a peer without turning every question into a consult
+
+If `consult:get_feedback` is in your permitted tool catalog, use it for one
+concrete, substantial technical question that remains after a first-pass check
+of local code, docs, or search, when a peer may already have solved it in their
+transcript. Include what you tried, what you observed, and the decision the
+answer informs.
+
+Do not use it for live state, a known agent, owner decisions, work handoffs, or
+anything code/docs/search already answer. Do not open duplicate consults or
+repeat an unchanged question after `no_available_responder`. The tool checks its
+archive first; a fresh route dispatches an isolated answer session from the
+expert transcript and walks the allowed model ranks, skipping walled backends.
+It does not wake the expert's live session, and you should not manually retry
+the same consult to work around a provider wall.
+
 ### `*_list` → `*_get` chaining
 
 Tools that come in list/get pairs (delegates, chats, tasks, goals)

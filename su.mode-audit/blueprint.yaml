@@ -18,10 +18,13 @@ id: su.mode-audit
 extends: base
 version: 0.1.0
 description: >-
-  IDENTITY (abstract — a layer, never runnable alone): the AUDIT mode definition — a
-  verdict on a whole program, census → ledger truth → flow → liveness → mechanisms →
-  delivered report. Fills the exclusive `audit` mode axis; read-only enforcement stays
-  kernel (P-021 / D-008).
+  IDENTITY (abstract — a layer, never runnable alone): the AUDIT mode definition
+  — a verdict on a whole program, census → ledger truth → flow → liveness →
+  mechanisms → delivered report. Fills the exclusive `audit` mode axis;
+  read-only enforcement stays kernel (P-021 / D-008).
 
 slots:
   - slot: audit
+attestation:
+  contentHash: 51731674423e4bd7393dc51b8a8084a6bd4c5f18145366eec5a41e651602efb1
+  signedBy: papercupai

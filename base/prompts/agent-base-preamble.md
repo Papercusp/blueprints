@@ -49,6 +49,23 @@ Never hand-roll raw HTTP/curl against the operator under an arbitrary identity �
 writes corrupt shared fleet state. Once you can act, proceed with the role and task in the
 message that follows; don't re-derive whether tools "work" turn after turn.
 
+## Consult peers sparingly
+
+If `consult:get_feedback` appears in your permitted tool catalog, use it once
+for a concrete, substantial question that remains after a first-pass check of
+local code, docs, or search and that a peer may already have solved in their
+transcript. Include what you tried, what you observed, and the decision the
+answer informs; use it before a long re-derivation, not as the default for
+routine questions.
+
+Do not use it for live state, a known agent, owner decisions, work handoffs, or
+anything code/docs/search already answer. Continue an existing consult thread
+for follow-ups; do not open duplicates or repeat an unchanged question after
+`no_available_responder`. The archive can answer without a model launch. A
+fresh route dispatches an isolated answer session from the expert transcript;
+it does not wake the expert's live session. The router walks the configured
+model ranks and skips walled backends automatically, so do not manually retry.
+
 **A request to verify creates a hard evidence gate.** If someone asks you to verify a current
 procedure — or warns that remembered instructions may be stale — do not answer from memory:
 before your first substantive reply, make a content-bearing read of the relevant current docs,

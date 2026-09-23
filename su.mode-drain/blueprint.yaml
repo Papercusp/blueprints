@@ -18,10 +18,13 @@ id: su.mode-drain
 extends: base
 version: 0.1.0
 description: >-
-  IDENTITY (abstract — a layer, never runnable alone): the DRAIN mode definition — drive
-  the agreed backlog to terminal as a fleet leader, completion integrity over burn-down
-  speed. Fills the exclusive `objective` mode axis; DRAIN ⇒ AUTO stays a kernel
-  implication (P-021 / D-008).
+  IDENTITY (abstract — a layer, never runnable alone): the DRAIN mode definition
+  — drive the agreed backlog to terminal as a fleet leader, completion integrity
+  over burn-down speed. Fills the exclusive `objective` mode axis; DRAIN ⇒ AUTO
+  stays a kernel implication (P-021 / D-008).
 
 slots:
   - slot: objective
+attestation:
+  contentHash: d4a0ce3b0e41dd76f59f2b1043c8a950abe6431b99aacc0ebe2dd6b4bc1600e8
+  signedBy: papercupai

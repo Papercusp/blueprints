@@ -17,9 +17,13 @@ id: su.mode-ideate
 extends: base
 version: 0.1.0
 description: >-
-  IDENTITY (abstract — a layer, never runnable alone): the IDEATE mode definition — the
-  owner's "invent net-new, don't just patch" switch read in the su's vocabulary. Fills the
-  exclusive `ideation` mode axis; stacks with `autonomy` (P-021 / D-008).
+  IDENTITY (abstract — a layer, never runnable alone): the IDEATE mode
+  definition — the owner's "invent net-new, don't just patch" switch read in the
+  su's vocabulary. Fills the exclusive `ideation` mode axis; stacks with
+  `autonomy` (P-021 / D-008).
 
 slots:
   - slot: ideation
+attestation:
+  contentHash: ce946a1ac9b6a725aba52be0426d693b538b665182d1764ae967e6bce2e57857
+  signedBy: papercupai

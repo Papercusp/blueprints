@@ -18,12 +18,16 @@
 # P-003's renderer producing the tier-appropriate rendering of it — is P-003 / P-023.
 id: papercusp-engineer
 extends: base
-version: 0.1.1
+version: 0.1.2
 visibility: public
 description: >-
   IDENTITY (abstract — a layer, never runnable alone): the software-engineering
-  profession. Fills the exclusive `domain` slot with su.md's engineering discipline,
-  extracted verbatim by P-002; P-023 makes it the coding hive's domain document.
+  profession. Fills the exclusive `domain` slot with su.md's engineering
+  discipline, extracted verbatim by P-002; P-023 makes it the coding hive's
+  domain document.
 
 slots:
   - slot: domain
+attestation:
+  contentHash: c19c053c9891cf49534f5458fcf9302adcb271ccc14a2836f89ccfa64220a334
+  signedBy: papercupai

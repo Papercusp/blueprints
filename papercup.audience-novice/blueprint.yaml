@@ -18,8 +18,13 @@ id: papercup.audience-novice
 extends: base
 version: 0.1.0
 description: >-
-  IDENTITY (abstract — a layer, never runnable alone): the novice-mode AUDIENCE for
-  the PAPERCUP fleet-blackboard chat role — a NOVICE — a domain expert / founder who does not make technical decisions. Fills the exclusive `audience` mode axis (P-021 / D-008).
+  IDENTITY (abstract — a layer, never runnable alone): the novice-mode AUDIENCE
+  for the PAPERCUP fleet-blackboard chat role — a NOVICE — a domain expert /
+  founder who does not make technical decisions. Fills the exclusive `audience`
+  mode axis (P-021 / D-008).
 
 slots:
   - slot: audience
+attestation:
+  contentHash: 384511c49ec62f472bcddc18704e13fb4b480943f2348e9caf28e172311ac184
+  signedBy: papercupai
