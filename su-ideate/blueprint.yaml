@@ -1,0 +1,54 @@
+# The `su-ideate` blueprint — scout-su-ideate-pipeline-gaps-2026-10-08 (P-007, D-005, D-006).
+#
+# The hourly su ideate pass SCHEDULER as a scheduled deterministic blueprint, same
+# shape as memory-precision / memory-live-recall-canary. Its single step fires the
+# registered typed function `su-ideate:schedule`, which evaluates the owner's D-015
+# overdue verdict (observation-count keyed, never calendar keyed —
+# su-ideate-learning-substrate-2026-07-10 D-015) per harness and launches AT MOST
+# ONE headless, independent su ideate pass for the first overdue harness.
+#
+# The hour is only the EVALUATION heartbeat, not a fire trigger: a harness with too
+# few observations since its last pass is never launched however long ago that was.
+# Cost bound (D-006): <= PAPERCUSP_SU_IDEATE_MAX_LAUNCHES_PER_DAY (default 6)
+# launches per rolling 24h, one pass in flight workspace-wide, <= 3 attempts per
+# harness per last-pass epoch. Kill switch: pause this routine row (routines:set).
+id: su-ideate
+extends: base
+version: 0.1.0
+description: >-
+  Hourly evaluation of the D-015 ideate-overdue verdict per harness; launches at
+  most one headless su ideate pass for the first overdue harness, so su ideation
+  no longer depends on someone manually entering IDEATE mode.
+
+# A descriptive work-item kind (the deterministic step creates no rows itself —
+# the launched pass records its own su-ideate tick); the schema requires the field.
+workItem:
+  kind: ideate-pass
+  idPrefix: SIP
+
+# Program-mode spine: one deterministic step, NO gate => deterministic pipeline.
+spine:
+  steps:
+    - id: schedule
+      op: su-ideate:schedule
+      bind: schedule
+
+knobs:
+  harnessKind: learning
+  requiresRepo: false
+
+# Scheduled trigger: HOURLY at :23 (offset off the top-of-hour pile-up). The routine
+# fires `system:blueprint-run { blueprintId: su-ideate }`; the handler detects
+# program-mode and runs the step inline. Seeds ACTIVE (finished feature, D-005).
+triggers:
+  schedule:
+    - cron: "0 23 * * * *"
+      action: system:blueprint-run
+      singleton: true        # workspace-singleton cadence — one routine per workspace
+      singletonActive: true  # seeds ACTIVE; the launch door is governor-admitted per start
+
+# No agent roles of its own (the step calls a registered function that launches a
+# standard su through capability:launch-agent) and no agent-tool deps.
+dependencies:
+  tools: []
+  plugins: []

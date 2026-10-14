@@ -51,6 +51,7 @@ spine:
 
 roles:
   - id: worker
+    account: null
     description: >-
       Reproduce + fix one auto-eligible improvement (kind=bug) with a regression
       test, self/inline-sized; VERIFY (tests green) then close the loop via

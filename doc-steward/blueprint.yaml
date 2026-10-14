@@ -32,6 +32,7 @@ spine:
 
 roles:
   - id: doc-steward
+    account: auto
     description: >-
       Re-verify/regenerate each drifted doc against the current code (code is the sole source of
       truth), preserve historical runbook knowledge (supersede + annotate, never delete),

@@ -25,6 +25,31 @@ description: >-
 
 slots:
   - slot: objective
+contributions:
+  - id: drain-definition
+    purpose: prompt
+    source: fixed
+    refresh: source-change
+    inputKind: prompt-file
+    ref: "mode:su.mode-drain:objective"
+  - id: current-mode-state
+    purpose: operational
+    source: provider
+    refresh: turn
+    inputKind: setting
+    ref: mode
+    producerRef: papercusp.mode-state@1
+    verb: read
+mode:
+  id: drain
+  policyRef: drain
+  title: "DRAIN — drive the queue to terminal"
+  oneLiner: "take a work-item backlog and drive every item to a terminal state;
+    completion integrity over speed"
+  definitionContributionId: drain-definition
+  implies: [ auto ]
+  requiresSubject: false
+  launchable: true
 attestation:
-  contentHash: d4a0ce3b0e41dd76f59f2b1043c8a950abe6431b99aacc0ebe2dd6b4bc1600e8
+  contentHash: 0d82b3c1cb102f079d9935af8f0fa4a3e5f7ced45cd7a0bb997b6f84317562dd
   signedBy: papercupai

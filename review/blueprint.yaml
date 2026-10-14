@@ -61,10 +61,10 @@ planner:
   kind: inline
 
 roles:
-  - { id: review-director, description: "Per-review-task orchestrator; emits the next verb." }
-  - { id: dimension-reviewer, description: "Reviews ONE dimension (bugs/security/perf/…); records findings on the work-item." }
-  - { id: finding-verifier, reactive: true, description: "Adversarial: tries to REFUTE a finding; majority-refute drops it." }
-  - { id: findings-synthesizer, description: "Dedups + ranks the confirmed findings into the final report." }
+  - { account: null, id: review-director, description: "Per-review-task orchestrator; emits the next verb." }
+  - { account: null, id: dimension-reviewer, description: "Reviews ONE dimension (bugs/security/perf/…); records findings on the work-item." }
+  - { account: null, id: finding-verifier, reactive: true, description: "Adversarial: tries to REFUTE a finding; majority-refute drops it." }
+  - { account: null, id: findings-synthesizer, description: "Dedups + ranks the confirmed findings into the final report." }
 
 # Reactive overlay (layer 3): the verifier fires AFTER a reviewer produces findings
 # (adversarial check before they count). Declared; the director controls dispatch.

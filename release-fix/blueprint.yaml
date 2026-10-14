@@ -35,6 +35,12 @@ spine:
 
 roles:
   - id: release-fixer
+    account: auto
+    backups:
+      - backend: claude-code
+        model: opus
+        effort: max
+        account: auto
     description: >-
       Read the checkpoint log, reproduce the failing test locally to classify
       real-regression vs flake, then fix the code or remove the flake's grip on

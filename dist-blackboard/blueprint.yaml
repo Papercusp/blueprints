@@ -38,6 +38,7 @@ coordination:
 
 roles:
   - id: worker
+    account: null
     description: >-
       A peer worker: self-claims the next ready task, reads the shared blackboard for peers' findings,
       solves it, and writes its own findings back to the board. Coordinates ONLY through the board —

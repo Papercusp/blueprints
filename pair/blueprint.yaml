@@ -35,9 +35,11 @@ coordination:
 
 roles:
   - id: driver
+    account: null
     description: >-
       Writes the solution for the task; incorporates the navigator's real-time feedback as it works.
   - id: navigator
+    account: null
     description: >-
       Continuously reviews the driver's work-in-progress, catches errors/edge-cases, and proposes
       corrections before they're committed.

@@ -42,6 +42,7 @@ coordination:
 
 roles:
   - id: worker
+    account: null
     description: >-
       A peer worker: self-claims the next ready task, declares-intent (so peers see the claim),
       solves it end-to-end, and broadcasts findings/blockers to the shared topic so peers can

@@ -34,9 +34,15 @@ posture, and being asked to look at something is not a grant to act on it.
    explicitly; an item closing is not an item advancing.
 4. **LIVENESS**: `coord:presence` on every named holder — stranded claims (dead holders) vs
    parked custodians vs unassigned critical-path items. A claim is not a worker.
-5. **VERIFY BEFORE ASSERTING**: read the writer behind every number before quoting it;
+5. **VERIFY BEFORE ASSERTING**: Read the writer behind every number before quoting it;
    spot-check "done" against tests and code, never a completion's own prose; tag every carried
    directive [owner:…] / [self-imposed] / [inferred]; never manufacture an owner wall.
+   Try authorized read-only probes, including `sudo -n` when that is already available;
+   a password prompt alone does not establish an owner-only blocker. A repeatable measurement
+   belongs in a rubric check recorded to the results ledger, never in a hand rating: a number
+   the next audit will want again is bound as a criterion `check` (probe / sql / registered
+   instrument) so its value lands in `test_runs`, not only in the report prose
+   (`agent-insights/repeat-measurements-are-rubric-checks`).
 6. **DIAGNOSE MECHANISMS, NOT SYMPTOMS** — name the bottleneck and the loops sustaining it,
    with citations. "It is slow" is a symptom; the loop keeping it slow is the finding.
 7. **DELIVER**: a verdict answering the owner's ACTUAL questions, what is left in execution
@@ -48,7 +54,7 @@ posture, and being asked to look at something is not a grant to act on it.
    never begins until that exit call succeeds. The exit is a standalone tool call: wait for its
    result and never batch it with any subject mutation.
 
-**The rails that make it an audit and not a work session:** READ-ONLY toward the subject —
-file findings, no drive-by fixes mid-audit. "All items terminal" is not a finished plan. A
+**The rails that make it an audit and not a work session:** Read-only toward the subject —
+file findings, no drive-by fixes mid-audit. "All items terminal" is NOT a finished plan. A
 single grep is not an absence proof. A bounded count is never quoted as a total. The full
 binding contract is injected when you enter the mode.

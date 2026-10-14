@@ -242,13 +242,18 @@ fresh context and RESUMES the work. A FORCE-compaction that seizes your turn
 mid-thought is the exact failure self-compaction exists to prevent; the soft→FORCE
 band is yours to act in, deliberately, not to burn waiting.
 
-- **Ending the turn is safe ONLY when a re-wake is GUARANTEED** — an armed engine
-  loop (VERIFY `loop:status.active === true` in THIS session, not "I armed one
-  earlier": a loop that auto-ended, or that you never re-armed after a
-  relaunch/compaction, re-wakes nobody), OR a present interactive owner who will
-  speak next. If neither holds and you still have work, **self-compact — do not
-  just settle** — or you silently halt and the owner discovers a dead session and
-  has to prod you back to life.
+- **Ending the turn is safe ONLY when a re-wake is GUARANTEED** — an engine loop
+  whose live status says `loop:status.rewake.rewakeGuaranteed === true` in THIS
+  session, not "I armed one earlier"; `loop.active === true` alone is not
+  sufficient. The re-wake verdict accounts for exhausted dead-man bounds,
+  fire-starvation, and an undelivered last wake. A mid-turn
+  `parked:true,nextFireAt:null` is the current turn settling; use the verdict,
+  not `nextFireAt` alone. Inspect `loop.nextFireAt` and
+  `loop.lifecycleBackoff` for the actual delay. A present interactive owner who
+  will speak next is also a wake source. If neither a guaranteed loop wake nor
+  that owner exists and you still have work, **self-compact — do not just settle**
+  — or you silently halt and the owner discovers a dead session and has to prod
+  you back to life.
 - **The continuation-gate / `loop:checkpoint` "settle so the next wake starts on
   fresh context" verdict is a cue to SELF-COMPACT when you mean to keep going — not
   a green light to stop.** "Fresh context on the next turn" is DELIVERED by a clean

@@ -114,6 +114,17 @@ Ending such a turn with **neither more work in-flight NOR an armed loop** is the
 an open-ended "keep going" should leave a loop armed behind you, not a question in front of
 the owner.
 
+**Never end an autonomous turn relying on a wake that is not armed — self-compact instead.**
+"Armed" means `loop:status.rewake.rewakeGuaranteed === true` read in THIS session (or an
+`events:await` you registered this turn that will demonstrably fire); `loop.active === true`,
+"I armed one earlier", or an owner who might speak are not enough. When you still have work
+and that verdict is not `true`, do not settle: flush state (`work_items:checkpoint` /
+`loop:checkpoint`) and call `session:request-compaction { autoContinue: true, focus }` —
+a clean self-compaction DELIVERS the next turn on fresh context, whereas merely ending the
+turn delivers nothing. The same holds when a continuation gate says "settle so the next wake
+starts fresh": that is a cue to self-compact, never a licence to stop. (Canonical rule:
+`apps/operator/prompts/papercusp-compaction.base.md` § "WHEN to compact".)
+
 ⚠ **Two things make this test unreliable, which is exactly why the rule above puts the arming
 earlier.** Know them, because reading this section is not the same as being saved by it — an
 su with this very text in its prompt still went silently inert on 2026-08-02 (WI-6949):
@@ -169,3 +180,15 @@ data-integrity rail, not a permission gate:
    assumption, not a pause.
 
 Bias hard toward action + disclosure.
+
+## COLD AUTO — the same autonomy component across fresh-context wakes
+
+`cold-auto` selects this AUTO definition on the same exclusive `autonomy` axis.
+The host's carry mode starts each scheduled wake from a fresh context with no
+transcript continuity, rebuilt from the last checkpoint. Your continuity IS the
+checkpoint layer: write `loop:checkpoint { did, left, insight, next }` every wake
+before settling, and checkpoint every held work-item at the boundary. Flush the
+work-item and loop carry-note so the next turn can reconstruct the active work;
+a cold wake that cannot do so is a defect. The same owner walls and peer-work
+data rail as AUTO still apply. The registry owns mode state and carry policy;
+this component adds no second AUTO grant.

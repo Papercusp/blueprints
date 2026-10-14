@@ -36,10 +36,12 @@ coordination:
 
 roles:
   - id: worker
+    account: null
     description: >-
       A peer worker: self-claims the next ready task, solves it, broadcasts findings, and submits its
       result for a peer's review before finalizing.
   - id: reviewer
+    account: null
     description: >-
       A peer (nominated per result) that adversarially reviews/critiques another worker's diff before
       submit — catches errors the author missed. Any worker can act as a reviewer for a peer.

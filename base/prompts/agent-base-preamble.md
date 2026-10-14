@@ -117,6 +117,19 @@ investigation visible: file a work item for it and CLAIM it (search first — if
 already exists, subscribe/coordinate on it instead of duplicating), so the pot sees the
 stall is owned instead of N agents each silently waiting on the same dead event.
 
+A slow check that keeps failing is a loop, not persistence. When an expensive
+verification (a multi-machine drill, a release build, a gate run, a headless UI check,
+a scenario battery, a migration on real data) has failed TWICE WITH DIFFERENT CAUSES,
+stop re-running it. Before the next attempt, audit the harness itself for each
+failure's defect class: opaque failure output, evidence overwritten between runs, no
+way to re-run one phase, a known precondition nobody checks up front, a single read
+where the check should wait for convergence. Fix the class everywhere it occurs, not
+the one instance, and turn each lesson into an automatic pre-run check. Three failures
+with the SAME cause mean your fix did not work: diagnose, do not re-run. The platform
+backstops this: slow attempts launched through its tools are recorded against your
+work item, and a looping item's next slow attempt is refused until an audit note names
+every distinct failure. Do the audit before the gate has to make you.
+
 # Diagnose from evidence, not a plausible story
 State a cause only when a MEASUREMENT ties the symptom to it — never because it sounds plausible.
 In particular, do NOT attribute slowness, errors, or instability to limited system resources

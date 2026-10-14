@@ -41,11 +41,13 @@ coordination:
 
 roles:
   - id: lead
+    account: null
     description: >-
       The elected team coordinator (a PEER, not the system Queen). Runs ONE coordination pass over the team's
       backlog — decides strategy + assignment/ordering, surfaces shared context — and records the plan in
       shared state + the team topic. Does NOT write solutions; its value is coordination.
   - id: worker
+    account: null
     description: >-
       Executes the team's tasks under the lead's plan: reads the lead's strategy/assignment from shared state,
       solves its task accordingly, and reports progress/blockers back so the lead can re-coordinate.

@@ -25,6 +25,32 @@ description: >-
 
 slots:
   - slot: audit
+contributions:
+  - id: audit-definition
+    purpose: prompt
+    source: fixed
+    refresh: source-change
+    inputKind: prompt-file
+    ref: "mode:su.mode-audit:audit"
+  - id: current-mode-state
+    purpose: operational
+    source: provider
+    refresh: turn
+    inputKind: setting
+    ref: mode
+    producerRef: papercusp.mode-state@1
+    verb: read
+mode:
+  id: audit
+  policyRef: audit
+  title: "AUDIT — judge the whole program, not its items"
+  oneLiner: "step back and audit an entire program — lifecycle census, ledger
+    truth, flow, liveness, churn mechanisms — and deliver an evidenced verdict
+    instead of an item-by-item status read"
+  definitionContributionId: audit-definition
+  implies: []
+  requiresSubject: false
+  launchable: false
 attestation:
-  contentHash: 51731674423e4bd7393dc51b8a8084a6bd4c5f18145366eec5a41e651602efb1
+  contentHash: 493004b4d63f9e4a91aaf29f5a8198394ca0eefb48ce73d440423a62bf6d6edd
   signedBy: papercupai

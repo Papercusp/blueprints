@@ -69,12 +69,12 @@ planner:
   kind: inline
 
 roles:
-  - { id: migration-director, description: "Per-migration-task orchestrator; emits the next verb." }
-  - { id: discoverer, description: "Finds all sites matching the migration pattern → a site list on the work-item." }
+  - { account: null, id: migration-director, description: "Per-migration-task orchestrator; emits the next verb." }
+  - { account: null, id: discoverer, description: "Finds all sites matching the migration pattern → a site list on the work-item." }
   # The transformer is dispatched once per site; `isolation: worktree` so concurrent
   # transforms (when fan-out lands) each get their own git worktree — no collisions.
-  - { id: transformer, isolation: worktree, description: "Transforms ONE site (worktree-isolated)." }
-  - { id: migration-verifier, description: "Runs the verify command per site + overall; green gates the site." }
+  - { account: null, id: transformer, isolation: worktree, description: "Transforms ONE site (worktree-isolated)." }
+  - { account: null, id: migration-verifier, description: "Runs the verify command per site + overall; green gates the site." }
 
 # Gym trace = the substrate git diff (migration produces code changes, like coding).
 # `regressionsFromTests` is the deterministic guardrail (the verify command).

@@ -66,6 +66,7 @@ spine:
 
 roles:
   - id: cup
+    account: null
     description: >-
       The generic Pot worker: read your brief (rides extras) + your ranked
       work-list (work_items), do the work owning your own sequencing (propose/

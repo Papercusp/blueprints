@@ -47,6 +47,7 @@ spine:
 
 roles:
   - id: gaia-worker
+    account: null
     description: >-
       The single GAIA solver: read the question (the problem_statement on the work_item),
       research it with your native web_search / fetch / bash(python) / file tools, and write

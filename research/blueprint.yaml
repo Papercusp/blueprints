@@ -62,10 +62,10 @@ planner:
   kind: inline
 
 roles:
-  - { id: research-director, description: "Per-task research orchestrator; emits the next verb." }
-  - { id: researcher, description: "Does the research for one task; produces findings." }
-  - { id: searcher, reactive: true, description: "Reactive: gathers/searches sources for the researcher." }
-  - { id: verifier, reactive: true, description: "Reactive: verifies the researcher's claims." }
+  - { account: null, id: research-director, description: "Per-task research orchestrator; emits the next verb." }
+  - { account: null, id: researcher, description: "Does the research for one task; produces findings." }
+  - { account: null, id: searcher, reactive: true, description: "Reactive: gathers/searches sources for the researcher." }
+  - { account: null, id: verifier, reactive: true, description: "Reactive: verifies the researcher's claims." }
 
 # Reactive overlay (layer 3): searcher can run before the researcher (gather),
 # verifier after (check). Declared; the director controls actual dispatch.

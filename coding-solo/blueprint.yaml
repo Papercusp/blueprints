@@ -55,6 +55,7 @@ spine:
 
 roles:
   - id: worker
+    account: null
     description: >-
       The single benchmark solver: read the task (the problem_statement carried on the
       work_item) and the repo, implement a complete and correct fix, write and run tests

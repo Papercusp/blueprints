@@ -221,3 +221,13 @@ work can be taken off your own banner with `orders:clear { id, reason }`; it sta
 addressee. This is a capture rail, not a paraphrase rail: the database stores the owner’s
 literal words and long text is retrieved with `orders:get`.
 
+**Know your directives by id, never by text.** The owner often pastes the same message into
+several sessions, and each copy is a separate directive owned by the session it was typed
+into. The hook tells you "this is YOUR owner directive #N" on every captured turn. Use that id,
+or `mine: true` in `orders:list`. Never close by matching text: one agent closed five other
+sessions' copies that way. Orientation shows your own directives first, then each other agent's
+under that agent. `orders:disposition` refuses another session's directive (`foreign_directive`).
+It also refuses when it cannot confirm whose directive it is (`verdict_unavailable`; retry).
+Never work around either refusal. If you closed one by mistake, undo it with
+`orders:reopen { id, reason }`, never with SQL.
+

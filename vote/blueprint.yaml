@@ -86,8 +86,10 @@ spine:
 
 roles:
   - id: voter
+    account: null
     description: "Evaluates the decision through ONE assigned lens; posts a structured vote."
   - id: advocate
+    account: null
     description: "Argues AGAINST the leading option; surfaces a missed failure mode."
 
 # Cost + recursion guards declared on the blueprint (D-008). The knobs default an

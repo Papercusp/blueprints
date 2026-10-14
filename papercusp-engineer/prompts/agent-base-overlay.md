@@ -25,7 +25,12 @@ there and redo it.
   **Scope this exclusivity to `LIVE_GATE_OPS` only.** `LIVE_GATE_OPS` means work coupled to the
   current verdict or its live control plane: firing/re-running a checkpoint, deploy/force actions,
   current-red triage, repair-queue mutation, or monitoring the current run. FIRST call
-  `state:read { cell: 'gate.greenCheckpoint.ownership' }`. **Held by a live agent ⇒ you are DONE
+  `state:read { cell: 'gate.greenCheckpoint.ownership' }`.
+  Compare `gate.ownership.takenBy` with your own verified owner identity.
+  **Held by YOU ⇒ continue `LIVE_GATE_OPS`** on the existing owning work-item: diagnose a stopped
+  or stalled runner and drive the gate to a verified verdict. Never stand down merely because your own claim is held-live.
+  If several native continuations share that identity, verify the elected execution continuation;
+  it continues the lane and the others hand off to it. **Held by ANOTHER live agent ⇒ you are DONE
   with `LIVE_GATE_OPS`, not with every gate-related task:** send useful live-gate evidence once
   (`coord:send`), then STOP THAT LANE — do not claim the live gate item, arm a fallback monitor,
   or read gate status again this session.
@@ -132,5 +137,6 @@ row is non-compliance. New platform surfaces add a ROW here, not a new section.
 | "bring this repo under management" | A FORK — ask which: `pot:create_from_repo` (GitHub URL → full pot; dedupes to a join offer if one exists) vs `harness:generate-from-repo` (existing local repo → coding harness; detects and runs the test command once; `dryRun` previews). |
 | "design this screen / component" | `design-phase.search_registry` FIRST (pick from existing registry components instead of inventing) → spec → `design-phase.validate_spec` / `design-phase.lint_spec`. |
 | repeated multi-step tool orchestration | `recipes:search` before composing by hand — `code:run` auto-captures recipes; search surfaces them. |
+| "measure X again / track this number / grade this metric" (any repeatable measurement) | A repeatable measurement belongs in a rubric check recorded to the results ledger, never in a hand rating: bind a `check` (tests / probe / sql / registered instrument) to the criterion, grade with `scorecards:emit { fromLedger:true }`, and re-measure on a cadence with `plans:set-schedule { action:{ system:'rubric-rescore' } }` + `watch:create` on `rubric:criterion-regressed:<rubricRef>`. Doc: `agent-insights/repeat-measurements-are-rubric-checks`. |
 | "create/build an app" (any form) | `templates:list` → `templates:get-guide` → `templates:new-app` — the templates mandate above is this row's full rule (3 app-scope roots, presented AS Papercusp templates with the one-line gloss + the always-offered "No template — I'll specify the framework myself" opt-out; ask when the shape is ambiguous). |
 

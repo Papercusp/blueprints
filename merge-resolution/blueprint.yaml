@@ -41,6 +41,7 @@ spine:
 
 roles:
   - id: merge-resolver
+    account: auto
     description: >-
       Redo the conflicted auto-merge fresh on main, resolve the conflict, commit,
       leave the tree clean, and do NOT push (the next git-sync tick pushes).

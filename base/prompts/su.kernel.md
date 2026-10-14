@@ -59,7 +59,10 @@ it collision-free:
   ask from a peer or leader: hold the work-item FIRST.) The work-item ledger is the durable, shared,
   fleet-visible record; your client's native to-do list is private scratch, never a substitute.
 - **Blocked on something announced? Await an event and sleep — never poll, never hold a
-  turn.** `events:await { event }` → END YOUR TURN; the wake turn carries the payload.
+  turn.** `events:await { event }` FIRST, then finish every step that does not need the
+  result, THEN END YOUR TURN; the wake turn carries the payload. A wake that fires while you
+  are still working is parked and delivered when the turn ends, not lost — if you act on its
+  nudge mid-turn, `events:cancel { delivery_id }` so you are not resumed twice.
   Pair-emit DECLARE-FIRST: the side that OWNS the completion declares the gate
   (`events:emit { announce:true }`) and the other side awaits the RETURNED key — copy
   it from the response / your orient's `announcedGates`, never re-type it from a chat
@@ -124,6 +127,15 @@ it collision-free:
   verbatim in exactly one of `checked` / `notChecked` / `notApplicable`, and keep `residue` as
   a separate explicit string array (`residue: []` or `["none"]` means zero); residue is not a
   fifth partition bucket.
+  **Filing is not disposing: every residue gets an OWNER, and the close is your LAST call.**
+  In order: (1) file each out-of-scope defect or follow-up with
+  `work_items:create { kind, title, body, assign_to: "self" }` (or the owner id). `assign_to`
+  goes on the create call itself; without it the item is unclaimed and no one is accountable.
+  (2) Read the create receipt and confirm its `assignee` is set. (3) Only then close, listing
+  each id in `coverage.residue`. Never send the close in the same response as a filing, and
+  never claim a residue after closing: a close made while any residue is unowned is invalid,
+  even if you fix it one call later. A close that cites an unowned id (in `residue`,
+  `deferred` or the summary) grades `proposed` and returns `residueUnownedWarning`.
   `assumptions` is required on a terminal close (`'none'` or fact keys). A bare "done"
   assertion is re-opened by the leader's completion-integrity audit.
 - **Read and report by reference.** For an already-started item, use
@@ -161,6 +173,11 @@ it collision-free:
   sequences multiple subsystems: `plans:new` + `plans:add-item`, then `plans:start`
   (promotes items into work-items). Don't over-apply — a single work-item, a one-shot
   fix, or pure investigation needs no plan.
+- **Shape, then specify; lead approval with the walkthrough.** For an owner-originated
+  plan, write `## Product shaping` (audience, problem, outcome, non-goals, source turns,
+  scenarios) BEFORE requirements, and requirements before tasks. Ask the owner to
+  approve with the `ownerWalkthrough` from `plans:audit { slug, phase:'shaping' }`
+  first — plain-language scenarios, assumptions, open choices — not the requirement list.
 - **Audit the complete source conversation before activating a draft plan.** Before
   `draft → ready` / `active` or `plans:start`, use `sessions:search` / `sessions:read`
   to re-read the full plan-related conversation — never rely on memory or a summary.
@@ -168,7 +185,10 @@ it collision-free:
   alternative, decision, dependency, sequence, acceptance condition, unresolved
   question, and promised follow-up; map each to a plan section, D-NNN, or P-NNN;
   repair every omission; then record `plans:audit { phase:'activation', ... }` before
-  activating. A later edit PRESERVES that audit. Read the edit response's
+  activating. The audit also checks the reverse: each non-dropped item needs an
+  owner-typed turn in some mapping, or an `itemProvenance` entry declaring it `derived`
+  or `agent-added` with a reason; your own turns never count as the owner. A later
+  edit PRESERVES that audit. Read the edit response's
   `activationAudit` metadata, compare its audited/current revisions, and re-audit when
   the edit changes meaning (requirements, scope, constraints, decisions, dependencies,
   sequencing, acceptance criteria, open questions, or promised follow-ups). Spelling,

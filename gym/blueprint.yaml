@@ -82,12 +82,12 @@ planner:
   kind: inline
 
 roles:
-  - { id: gym-director, description: "Per-gym-task optimizer orchestrator; emits the next optimization verb." }
-  - { id: task-generator, description: "Generates / curates the eval task set the target harness is scored on." }
-  - { id: variant-runner, description: "Runs one target-blueprint variant over the eval set as a durable sub-harness (recursion)." }
-  - { id: judge, description: "Frozen Opus judge (gym:judge): scores each run's distilled trace against the target's rubric." }
-  - { id: proposer, description: "Proposes a target-blueprint / prompt edit from the judged traces + signals." }
-  - { id: committer, description: "On accept, commits the target's .papercusp/blueprint.yaml / prompt and re-projects it (commit→reproject)." }
+  - { account: null, id: gym-director, description: "Per-gym-task optimizer orchestrator; emits the next optimization verb." }
+  - { account: null, id: task-generator, description: "Generates / curates the eval task set the target harness is scored on." }
+  - { account: null, id: variant-runner, description: "Runs one target-blueprint variant over the eval set as a durable sub-harness (recursion)." }
+  - { account: null, id: judge, description: "Frozen Opus judge (gym:judge): scores each run's distilled trace against the target's rubric." }
+  - { account: null, id: proposer, description: "Proposes a target-blueprint / prompt edit from the judged traces + signals." }
+  - { account: null, id: committer, description: "On accept, commits the target's .papercusp/blueprint.yaml / prompt and re-projects it (commit→reproject)." }
 
 # Recursion (layer 4 — OTP-style supervision): run-target-variant spawns the TARGET
 # harness as a durable sub-harness. The child is NOT the gym (self) but the *target*

@@ -34,6 +34,40 @@ description: >-
 
 slots:
   - slot: autonomy
+contributions:
+  - id: auto-definition
+    purpose: prompt
+    source: fixed
+    refresh: source-change
+    inputKind: prompt-file
+    ref: "mode:su.mode-auto:autonomy"
+  - id: current-mode-state
+    purpose: operational
+    source: provider
+    refresh: turn
+    inputKind: setting
+    ref: mode
+    producerRef: papercusp.mode-state@1
+    verb: read
+mode:
+  id: auto
+  policyRef: auto
+  title: "AUTO — act, don’t ask"
+  oneLiner: "act on your own judgment, replace questions with disclosures, arm a
+    loop for open-ended work"
+  definitionContributionId: auto-definition
+  implies: []
+  requiresSubject: false
+  launchable: true
+  aliases:
+    - id: cold-auto
+      title: "COLD AUTO — auto across fresh-context wakes"
+      oneLiner: "AUTO carried across scheduled cold wakes: fresh context each fire,
+        continuity via the carry-note"
+      definitionHeading: "## COLD AUTO — the same autonomy component across fresh-context wakes"
+      implies: []
+      requiresSubject: false
+      launchable: false
 attestation:
-  contentHash: c00629ce2b45a78a12e47d202ca3160ea87fce78c891aa00c0d4fb01f017b497
+  contentHash: 18d06f0aaf22811fac85d72045b8fe8898e325d442937ef952efe14dcac5a3e5
   signedBy: papercupai

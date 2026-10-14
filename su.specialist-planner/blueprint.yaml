@@ -1,0 +1,17 @@
+id: su.specialist-planner
+extends: base
+version: 0.1.0
+description: "Reusable planner specialization for an SU identity; assignment and
+  launch profile remain host facts."
+slots:
+  - slot: practice
+contributions:
+  - id: planner-specialization
+    purpose: prompt
+    source: fixed
+    refresh: source-change
+    inputKind: prompt-file
+    ref: specialist:su.planner
+attestation:
+  contentHash: 2106894e3af9c2348e202e11f4c711c39c0172013b466bdaf752ca621057842a
+  signedBy: papercupai

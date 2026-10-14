@@ -38,6 +38,7 @@ coordination:
 
 roles:
   - id: worker
+    account: null
     description: >-
       A peer worker: self-claims a task, joins the huddle for its repo (shares repo-understanding with
       same-repo peers, coordinates edits, peer-reviews within the group), and solves the task.

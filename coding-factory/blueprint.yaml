@@ -99,22 +99,22 @@ planner:
   kind: features-import
 
 roles:
-  - { id: director, description: "Per-feature orchestrator; emits the next decision verb." }
-  - { id: scoper }
-  - { id: architect }
-  - { id: worker }
-  - { id: validator }
+  - { account: null, id: director, description: "Per-feature orchestrator; emits the next decision verb." }
+  - { account: null, id: scoper }
+  - { account: null, id: architect }
+  - { account: null, id: worker }
+  - { account: null, id: validator }
   # NOTE: `reviewer` ships/returns at the PR gate, NOT via a per-feature director
   # verb — it's modeled as an approval gate (gates.approvals), not a spine role.
-  - { id: debugger, reactive: true, description: "Read-only debugger fired before a worker retry." }
-  - { id: documenter }
-  - { id: curator }
+  - { account: null, id: debugger, reactive: true, description: "Read-only debugger fired before a worker retry." }
+  - { account: null, id: documenter }
+  - { account: null, id: curator }
   # Opt-in quality roles — dispatched only when the harness opts in (dormant by
   # default). Declared so the spine's NEXT_SECURITY / NEXT_CROSSCHECK / NEXT_UI_QA
   # edges resolve to a real prompt.
-  - { id: security-reviewer, reactive: true }
-  - { id: crosscheck, reactive: true }
-  - { id: ui-qa, reactive: true }
+  - { account: null, id: security-reviewer, reactive: true }
+  - { account: null, id: crosscheck, reactive: true }
+  - { account: null, id: ui-qa, reactive: true }
 
 # Reactive overlay (layer 3): the debugger-before-worker gate. Fires before a
 # worker dispatch once attempts ≥ threshold and no debug note exists yet (read-only,
@@ -140,7 +140,7 @@ gym:
   signals: [regressionsFromTests, plantedBugCaught]
   rubric:
     version: v1
-    model: gpt-5.6-sol:xhigh
+    model: gpt-6.1-sol:xhigh
     weights: { d1: 0.5, d2: 0.25, d3: 0.25 }
 
 knobs:

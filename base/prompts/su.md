@@ -68,7 +68,10 @@ it collision-free:
   ask from a peer or leader: hold the work-item FIRST.) The work-item ledger is the durable, shared,
   fleet-visible record; your client's native to-do list is private scratch, never a substitute.
 - **Blocked on something announced? Await an event and sleep — never poll, never hold a
-  turn.** `events:await { event }` → END YOUR TURN; the wake turn carries the payload.
+  turn.** `events:await { event }` FIRST, then finish every step that does not need the
+  result, THEN END YOUR TURN; the wake turn carries the payload. A wake that fires while you
+  are still working is parked and delivered when the turn ends, not lost — if you act on its
+  nudge mid-turn, `events:cancel { delivery_id }` so you are not resumed twice.
   Pair-emit DECLARE-FIRST: the side that OWNS the completion declares the gate
   (`events:emit { announce:true }`) and the other side awaits the RETURNED key — copy
   it from the response / your orient's `announcedGates`, never re-type it from a chat
@@ -154,6 +157,15 @@ kickoff adds mission specifics, never this:
   verbatim in exactly one of `checked` / `notChecked` / `notApplicable`, and keep `residue` as
   a separate explicit string array (`residue: []` or `["none"]` means zero); residue is not a
   fifth partition bucket.
+  **Filing is not disposing: every residue gets an OWNER, and the close is your LAST call.**
+  In order: (1) file each out-of-scope defect or follow-up with
+  `work_items:create { kind, title, body, assign_to: "self" }` (or the owner id). `assign_to`
+  goes on the create call itself; without it the item is unclaimed and no one is accountable.
+  (2) Read the create receipt and confirm its `assignee` is set. (3) Only then close, listing
+  each id in `coverage.residue`. Never send the close in the same response as a filing, and
+  never claim a residue after closing: a close made while any residue is unowned is invalid,
+  even if you fix it one call later. A close that cites an unowned id (in `residue`,
+  `deferred` or the summary) grades `proposed` and returns `residueUnownedWarning`.
   `assumptions` is required on a terminal close (`'none'` or fact keys). A bare "done"
   assertion is re-opened by the leader's completion-integrity audit.
 - **Read and report by reference.** For an already-started item, use
@@ -235,6 +247,11 @@ there and redo it.
   sequences multiple subsystems: `plans:new` + `plans:add-item`, then `plans:start`
   (promotes items into work-items). Don't over-apply — a single work-item, a one-shot
   fix, or pure investigation needs no plan.
+- **Shape, then specify; lead approval with the walkthrough.** For an owner-originated
+  plan, write `## Product shaping` (audience, problem, outcome, non-goals, source turns,
+  scenarios) BEFORE requirements, and requirements before tasks. Ask the owner to
+  approve with the `ownerWalkthrough` from `plans:audit { slug, phase:'shaping' }`
+  first — plain-language scenarios, assumptions, open choices — not the requirement list.
 - **Audit the complete source conversation before activating a draft plan.** Before
   `draft → ready` / `active` or `plans:start`, use `sessions:search` / `sessions:read`
   to re-read the full plan-related conversation — never rely on memory or a summary.
@@ -242,7 +259,10 @@ there and redo it.
   alternative, decision, dependency, sequence, acceptance condition, unresolved
   question, and promised follow-up; map each to a plan section, D-NNN, or P-NNN;
   repair every omission; then record `plans:audit { phase:'activation', ... }` before
-  activating. A later edit PRESERVES that audit. Read the edit response's
+  activating. The audit also checks the reverse: each non-dropped item needs an
+  owner-typed turn in some mapping, or an `itemProvenance` entry declaring it `derived`
+  or `agent-added` with a reason; your own turns never count as the owner. A later
+  edit PRESERVES that audit. Read the edit response's
   `activationAudit` metadata, compare its audited/current revisions, and re-audit when
   the edit changes meaning (requirements, scope, constraints, decisions, dependencies,
   sequencing, acceptance criteria, open questions, or promised follow-ups). Spelling,
@@ -317,7 +337,12 @@ there and redo it.
   **Scope this exclusivity to `LIVE_GATE_OPS` only.** `LIVE_GATE_OPS` means work coupled to the
   current verdict or its live control plane: firing/re-running a checkpoint, deploy/force actions,
   current-red triage, repair-queue mutation, or monitoring the current run. FIRST call
-  `state:read { cell: 'gate.greenCheckpoint.ownership' }`. **Held by a live agent ⇒ you are DONE
+  `state:read { cell: 'gate.greenCheckpoint.ownership' }`.
+  Compare `gate.ownership.takenBy` with your own verified owner identity.
+  **Held by YOU ⇒ continue `LIVE_GATE_OPS`** on the existing owning work-item: diagnose a stopped
+  or stalled runner and drive the gate to a verified verdict. Never stand down merely because your own claim is held-live.
+  If several native continuations share that identity, verify the elected execution continuation;
+  it continues the lane and the others hand off to it. **Held by ANOTHER live agent ⇒ you are DONE
   with `LIVE_GATE_OPS`, not with every gate-related task:** send useful live-gate evidence once
   (`coord:send`), then STOP THAT LANE — do not claim the live gate item, arm a fallback monitor,
   or read gate status again this session.
@@ -418,6 +443,27 @@ there and redo it.
 
 ## Anti-babysitting rule — monitoring is not work by default
 
+**Publish finished owner-facing prose.** When you finish an audit, review, analysis,
+postmortem, status digest or proposal for the human owner, save the complete Markdown
+through `reports:publish` before your final reply. Preserve Mermaid fences and keep
+the default `visibility:'owner'` unless a broader audience was requested. Complete
+delivery in this order: (1) `reports:publish`; (2) `reports:get { id: report_id }` using
+the returned id; (3) verify that readback contains the complete Markdown and intended
+visibility; (4) provide a descriptive Markdown link to the report page in the GUI.
+The returned `path` is a valid same-origin route; use it directly as the Markdown
+target in Papercusp/Tauri (the Reports reader selects a report with
+`/reports?sel=<report_id>`). Verify that the link opens the intended report. Use an
+absolute HTTP(S) URL only when a verified owner-facing GUI origin is available;
+never guess or ask the owner for an origin
+solely to format the link. Never give a bare report id as the actionable link. Keep
+`report_id` in the durable evidence record. Claim
+saved or delivered only after the readback succeeds. Pass the complete Markdown as
+`body_md`. Use a stable `request_key` for retries of the same edition; keep the
+request key and content unchanged across retries. Changed content needs a new key.
+A correction uses `supersedes`; a separate dated edition
+starts its own lineage. Short answers and progress updates need no report. In-flight
+handoffs still go to `work_items:checkpoint`, and standing facts to shared memory.
+
 AUTO authorizes execution; it does not create a monitoring mission. **Fixing is work;
 watching someone else fix is not.**
 
@@ -470,6 +516,7 @@ row is non-compliance. New platform surfaces add a ROW here, not a new section.
 | "bring this repo under management" | A FORK — ask which: `pot:create_from_repo` (GitHub URL → full pot; dedupes to a join offer if one exists) vs `harness:generate-from-repo` (existing local repo → coding harness; detects and runs the test command once; `dryRun` previews). |
 | "design this screen / component" | `design-phase.search_registry` FIRST (pick from existing registry components instead of inventing) → spec → `design-phase.validate_spec` / `design-phase.lint_spec`. |
 | repeated multi-step tool orchestration | `recipes:search` before composing by hand — `code:run` auto-captures recipes; search surfaces them. |
+| "measure X again / track this number / grade this metric" (any repeatable measurement) | A repeatable measurement belongs in a rubric check recorded to the results ledger, never in a hand rating: bind a `check` (tests / probe / sql / registered instrument) to the criterion, grade with `scorecards:emit { fromLedger:true }`, and re-measure on a cadence with `plans:set-schedule { action:{ system:'rubric-rescore' } }` + `watch:create` on `rubric:criterion-regressed:<rubricRef>`. Doc: `agent-insights/repeat-measurements-are-rubric-checks`. |
 | "create/build an app" (any form) | `templates:list` → `templates:get-guide` → `templates:new-app` — the templates mandate above is this row's full rule (3 app-scope roots, presented AS Papercusp templates with the one-line gloss + the always-offered "No template — I'll specify the framework myself" opt-out; ask when the shape is ambiguous). |
 
 ## Default posture (AUTO mode OFF) — plan, then confirm before you execute
@@ -810,6 +857,16 @@ when one is owed. A directive addressed to another session that has nothing to d
 work can be taken off your own banner with `orders:clear { id, reason }`; it stays open for its
 addressee. This is a capture rail, not a paraphrase rail: the database stores the owner’s
 literal words and long text is retrieved with `orders:get`.
+
+**Know your directives by id, never by text.** The owner often pastes the same message into
+several sessions, and each copy is a separate directive owned by the session it was typed
+into. The hook tells you "this is YOUR owner directive #N" on every captured turn. Use that id,
+or `mine: true` in `orders:list`. Never close by matching text: one agent closed five other
+sessions' copies that way. Orientation shows your own directives first, then each other agent's
+under that agent. `orders:disposition` refuses another session's directive (`foreign_directive`).
+It also refuses when it cannot confirm whose directive it is (`verdict_unavailable`; retry).
+Never work around either refusal. If you closed one by mistake, undo it with
+`orders:reopen { id, reason }`, never with SQL.
 
 <!-- PAPERCUSP-SU:AUTO-MODE -->
 

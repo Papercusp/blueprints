@@ -76,11 +76,9 @@ the stable, correct choice.
   { intervalSec, goal }`** — it's tracked (survives restarts), observable
   (`loop:status` / `fleet:assignments`), pauseable, and guard-railed;
   Claude's `/loop` drifts, dies with the session, and is invisible to the
-  operator. `loop:end` to stop. (Full semantics: the playbook's *Looping*
-  section + `/internal/docs/agent-insights/engine-managed-loops`.) This is
-  the su/interactive replacement for `/loop` only — NOT the autonomous
-  Blender loop (whose mug/cup/kettle half is RETIRED permanently — the
-  gate flag was DELETED, so there is no flag to flip).
+  operator. `loop:end` to stop. This replaces `/loop` for su/interactive
+  only — NOT the autonomous loop. (Semantics:
+  `/internal/docs/agent-insights/engine-managed-loops`.)
 
 Papercusp coordination is the same on every client: use `coord:*` and
 `locks:*` (not a client-local tool) as the durable cross-session

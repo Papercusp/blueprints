@@ -45,6 +45,7 @@ spine:
 
 roles:
   - id: papercup
+    account: null
     description: >-
       The fleet watcher: sweep fleet:assignments/tree (stuck/orphaned spawns),
       coord:presence/inbox/feed (substrate health), harness:health/escalation

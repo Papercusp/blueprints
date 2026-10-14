@@ -35,6 +35,7 @@ spine:
 
 roles:
   - id: content-fixer
+    account: auto
     description: >-
       Fix ONLY the syntax of the quarantined files so they pass their content
       detector; change nothing else; leave the tree clean and do NOT push.

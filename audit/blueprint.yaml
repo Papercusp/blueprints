@@ -45,6 +45,7 @@ planner:
 
 roles:
   - id: auditor
+    account: null
     description: >-
       Read-only adversarial judgment: screen a remote-authored feature and emit a
       structured admit/reject verdict with reasons. No execution capability.

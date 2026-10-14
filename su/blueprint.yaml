@@ -1,0 +1,30 @@
+id: su
+extends:
+  - papercusp-engineer
+  - su-collaborator
+  - su.practice
+version: 0.1.0
+visibility: public
+description: "Named SU identity composition. Client, fleet assignment and modes
+  are selected separately; this package grants no role or authority."
+slots: []
+contributions:
+  - id: current-mode-state
+    purpose: operational
+    source: provider
+    refresh: turn
+    inputKind: setting
+    ref: mode
+    producerRef: papercusp.mode-state@1
+    verb: read
+  - id: current-assignment
+    purpose: operational
+    source: provider
+    refresh: turn
+    inputKind: setting
+    ref: assignment
+    producerRef: papercusp.current-assignment@1
+    verb: read
+attestation:
+  contentHash: 6a10e4d620555e9065aa8920562edbec3c5c3a45ecd6a9ab836b1651d5d73118
+  signedBy: papercupai

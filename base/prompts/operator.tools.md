@@ -10,21 +10,13 @@
 
 ## Cross-tool patterns
 
-### Consult a peer without turning every question into a consult
+### Consult peer expertise (when available)
 
-If `consult:get_feedback` is in your permitted tool catalog, use it for one
-concrete, substantial technical question that remains after a first-pass check
-of local code, docs, or search, when a peer may already have solved it in their
-transcript. Include what you tried, what you observed, and the decision the
-answer informs.
+When your permitted catalog provides a peer-consult tool, use it once for a specific, substantial technical question that remains after a first-pass check of local code, docs, or search, especially when another agent may already have solved it. Include what you tried, observed, and the decision at stake.
 
-Do not use it for live state, a known agent, owner decisions, work handoffs, or
-anything code/docs/search already answer. Do not open duplicate consults or
-repeat an unchanged question after `no_available_responder`. The tool checks its
-archive first; a fresh route dispatches an isolated answer session from the
-expert transcript and walks the allowed model ranks, skipping walled backends.
-It does not wake the expert's live session, and you should not manually retry
-the same consult to work around a provider wall.
+Do not use peer consultation for live state, a known agent, owner decisions, handoffs, or questions local code, docs, or search already answer. Do not duplicate or repeat an unchanged request after `no_available_responder`.
+
+When available, archive answers do not launch a model session; fresh answers run in an isolated answer session from the expert transcript. Routing skips walled backends and does not wake the expert's live session; no manual retry is needed.
 
 ### `*_list` → `*_get` chaining
 
@@ -236,7 +228,8 @@ for the same thing.
    signs, sends store-and-forward (durable: a queued send survives the peer being
    offline), and records the ask in your ledger. It returns a `correlationId` and
    an `answeredEvent` key (`cross-pot:answered:<correlationId>`).
-3. `events:await { event: <answeredEvent> }` then **END YOUR TURN**. The peer's
+3. `events:await { event: <answeredEvent> }`, finish any work that does not need
+   the reply, then **END YOUR TURN**. The peer's
    answer/decline arrives through the boundary, transitions the ledger row, and
    fires that event — re-invoking a sleeping agent with the reply. (`pot:asks`
    is the read-back if you need to review state; the wake is the no-poll path.)

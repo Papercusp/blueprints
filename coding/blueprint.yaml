@@ -99,11 +99,13 @@ planner:
 
 roles:
   - id: operator
+    account: null
     description: >-
       The operator in charge: survey the fleet, decide what matters, create or
       supervise harnesses from blueprints, surface curated reports, and declare
       the next wake before ending the turn.
   - id: mug
+    account: null
     description: >-
       The Queen — specialized placement decider for the hive. Surveys the work
       frontier and bee load, ranks tasks, picks a placement for each (free slot /

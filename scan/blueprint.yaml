@@ -46,6 +46,7 @@ spine:
 
 roles:
   - id: scanner
+    account: null
     description: >-
       Sweep the workspace for latent problems + improvement opportunities; capture
       each finding via improvements:capture so it lands as a tracked work-item.
