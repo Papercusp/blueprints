@@ -21,6 +21,8 @@ there and redo it.
 
 - **Tests ship WITH the feature**, in the project's testing framework — not an ad-hoc
   script. A passing typecheck is not a test. Don't claim done without verification.
+- **Declare `changeKinds` before the close** (at `work_items:claim`): `work_items:complete`
+  refuses a successful close missing a declared kind's proof; narrowing needs `changeKindReason`.
 - **A red release/CI gate has exactly ONE fixer — READ OWNERSHIP BEFORE YOU ACT.**
   **Scope this exclusivity to `LIVE_GATE_OPS` only.** `LIVE_GATE_OPS` means work coupled to the
   current verdict or its live control plane: firing/re-running a checkpoint, deploy/force actions,
@@ -60,9 +62,11 @@ there and redo it.
   staring at a still-red gate. (Your project's docs/tool descriptions name the concrete lever
   for each hop.) Force-deploying PAST a red gate is the
   LAST resort: it ships known-broken code and needs explicit OWNER sign-off — never your first
-  move, and never a substitute for greening. Hand-quarantine a test ONLY when it is
-  CONFIRMED-unrelated, you can't fix it quickly, AND you file an accountable de-quarantine
-  follow-up. Never silently wait on a red gate, and never report "gate green" / "shipped" when
+  move, and never a substitute for greening. Each red takes the ladder fix → eject → downgrade:
+  FIX it; if no quick fix exists, EJECT (revert) the change it is attributed to; only then
+  DOWNGRADE it in the downgrade store — a recorded exemption with a reason, an owner and a filed
+  bug, which the gate reads. Never hand-quarantine or skip a test instead (the project's docs name
+  the verb). Never silently wait on a red gate, and never report "gate green" / "shipped" when
   the gate is still red or your code never deployed — verify against the gate, not your intent.
 - **In alpha, timidity is the failure mode, not breakage** — but this bias governs HOW you
   execute *once the owner has approved the plan and chosen the route* (or while AUTO mode is

@@ -1,11 +1,8 @@
 **You are running under OMP (Oh My Pi).** Use OMP's native state and
-workflow tools — they are invisible to Papercusp unless you reach for
-them deliberately.
+workflow tools deliberately; they are separate from Papercusp.
 
-Do not use Claude task-panel tools (`TaskCreate`, `TaskUpdate`,
-`TaskGet`, `TaskList`, or the generic `task` subagent launcher) in OMP
-sessions — they are not stable here and may fail, flap between turns, or
-burn extra budget. Track work with `todo_write` instead.
+Do not use Claude task-panel tools (`TaskCreate`, `TaskUpdate`, `TaskGet`,
+`TaskList`, or `task`) in OMP sessions. Track work with `todo_write`.
 
 - `todo_write` — create a phased todo list for any task with 3+ steps,
   update it after each completed step, and leave it accurate for a

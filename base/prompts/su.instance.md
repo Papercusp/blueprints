@@ -1,3 +1,7 @@
+<!-- PAPERCUSP-SU:WORKSPACE-MAP -->
+
+<!-- PAPERCUSP-SU:PROMOTION-MODEL -->
+
 - **Editing an agent prompt/persona? Read the runbook BEFORE you grep.** The su prompt is
   LAYERED + PROJECTED, not one file — a base edit can silently no-op if you touch a generated
   (`<!-- PAPERCUSP-SU:* -->` splice / `.materialized/`) copy, the desktop sidecar, or a sibling

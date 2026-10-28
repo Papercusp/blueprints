@@ -81,7 +81,8 @@ Hand-offs are durable
 thread), never in-memory.
 
 Other nouns in one line each: **Workspace** = one install (many pots, one PG,
-one credential set; `papercusp:list_workspaces`). **Run/spawn** = one agent
+one credential set; `papercusp:list_workspaces` is the unscoped cross-workspace
+discovery helper). **Run/spawn** = one agent
 invocation (tracked in `harness_shared.spawned_agents`). **Role** = agent kind —
 the runtime source of truth is `AGENT_ROLES`
 (`packages/agent-mcp/src/role-config.ts`); spawn personas at
@@ -101,8 +102,9 @@ Cupboard) is mid-rename: `project-centric-harness-rethink` D-014.
 Most state lives under a harness, so harness-scoped tools (`docs:*`, `plans:*`,
 `features:*`, `issues:*`, `agent_chats:*`) need to know **which** — and **the
 `harness` arg is per-call, not a session property**. Important exception:
-`harness:get` and `harness:status` take their own `slug`/`slugs` arguments; do
-**not** add a top-level `harness` field to those calls:
+`harness:get` takes `slug` and `harness:status` takes `slug`/`slugs`; do
+**not** add a top-level `harness` field to those calls. Both take an optional
+`workspace` for unscoped superuser calls; omit it in workspace-scoped sessions:
 
 1. **Session scoped to a harness** (`ctx.harnessSlug` set) — pass nothing.
 2. **Operator scope (the usual SU case)** — **name the harness on the call**:
@@ -123,10 +125,12 @@ session, `cross_harness:docs_*` / `cross_harness:plans_*` read another harness.
 Workspace-global tools (`harness:list`, `search:*`, `memory:*`, `coord:*`,
 `locks:*`, `flags:*`, …) work regardless of scope; a few need a workspace
 transaction (`audit:list`) and fail `workspace_required` until you pass
-`workspace: '<slug>'` per call. When the user names a topic:
-`papercusp:list_workspaces` → `harness:list { workspace }` → the per-harness
-verb. Don't paper over a missing workspace/slug with a default — ask one short
-question.
+`workspace: '<slug>'` per call. When the user names a topic, use the existing
+workspace context first: in a workspace-scoped session call `harness:list`
+directly, then the per-harness verb. Only an unscoped superuser session should
+call `papercusp:list_workspaces` to choose a workspace before calling
+`harness:list { workspace }`. Don't paper over a missing workspace/slug with a
+default — ask one short question.
 
 **Release-gate exception:** `release:checkpoint-run` is workspace-global, not
 harness-scoped. Its live schema accepts only `force`, `replaceStale`, `paths`,
@@ -172,7 +176,7 @@ emits telemetry (`/internal/docs/endpoint-system/superuser-mode`).
   |---|---|
   | exact text, a literal, a config key, a filename | `rg` (working-tree bytes) |
   | definition, references, implementations, type truth, diagnostics, refactor preview | `lsp:query` (compiler semantics) |
-  | call chains, impact radius, subsystem/route topology | `gitnexus.context` / `gitnexus.impact` (indexed graph; freshness always explicit) |
+  | call chains, impact radius, subsystem/route topology | `graph:query` (`context` / `impact` / `trace`, bounded `paths`; first-party JS/TS compiler or syntax evidence, with explicit coverage and runtime limits) |
   | a syntax pattern or a mechanical codemod | `code:structural` (ast-grep shape, never type truth) |
   | packaging evidence for a reviewer or a model | `code:pack` — strictly POST-retrieval, never an authority for symbol truth |
 
@@ -187,8 +191,11 @@ emits telemetry (`/internal/docs/endpoint-system/superuser-mode`).
   ⚠ **Two raw backends are deliberately NOT the route.** `gitnexus.query`
   is UNAVAILABLE: historical builds returned empty or unranked noise, and
   current real-symbol probes SIGSEGV the shared GitNexus MCP process (D-065),
-  so the bridge refuses it. Use `gitnexus.context` for a known symbol,
-  `graph:query` for topology, or `rg` for keywords. Raw `repomix.pack` skips
+  so the bridge refuses it. Use `graph:query` for topology or `rg` for keywords.
+  Optional internal `gitnexus.context` / `gitnexus.impact` comparisons remain
+  authorized by gitnexus-deterministic-integration D-005, with index freshness
+  explicit; D-004 excludes GitNexus from public/installer distribution and
+  shipped dependencies. Raw `repomix.pack` skips
   the pinned version and the secret-scanning rails `code:pack` enforces
   (D-040/D-041). ⚠ A gitnexus call answering `Unknown namespace(s): gitnexus`
   means fall back to `rg` + `lsp:query` — never "no call chains exist". 📖
@@ -386,14 +393,15 @@ Coordinate through locks + coord, not tree isolation.
 **Two operators — `:3070` auto-serves green `main`; `:3170` is where your edits
 run.** `:3070` (`papercup-dev-api`) runs from the **release checkout** pinned
 to green `main` — restarting it does NOT pick up your `staging` edits. The
-staging operator **`:3170` runs from the separate `papercusp-staging` checkout
-pinned to `origin/staging`**, so uncommitted edits and commits that git-sync has
-not pushed yet are invisible there; a restart cannot make an unpublished edit
-appear. Use focused tests or a current-build instance for unpublished work.
-After git-sync publishes the candidate, reload staging with `dev:restart {
-target: 'staging', confirm: true, authorize: true, reason: 'reload staging
-after origin/staging advanced' }`, then probe **`:3170`** and compare its health
-sha with the intended `origin/staging` build. Promotion to `:3070` is automatic
+staging operator **`:3170` serves an isolated generation of the LOCAL committed
+`staging`** (`sync-staging-checkout.sh` resolves `rev-parse staging`, not
+`origin/staging`), so an uncommitted or git-sync-held edit is invisible there; a
+committed-but-unpushed one is not, and a restart cannot make an uncommitted edit
+appear. Use focused tests or a current-build instance for uncommitted work.
+`papercup-staging-sync.timer` advances it every ~5 min; `dev:restart { target:
+'staging', confirm: true, authorize: true, reason: '…' }` only relaunches the
+same generation. Probe **`:3170`** and compare its health sha with the intended
+local `staging` commit. Promotion to `:3070` is automatic
 (green-checkpoint hourly FF → release-trigger ≤15 min scripted deploy with
 auto-rollback); a manual `npx tsx apps/operator/lib/release/deploy-cli.ts
 --execute` deploys immediately. Watch the pipeline at `/admin/git`. Full model: plans
@@ -1166,9 +1174,11 @@ Papercusp coordination (`coord:*`, `locks:*`) is identical on every client.
 <!-- PAPERCUSP-SU:FULL-ONLY:BEGIN -->
 ## Named workflows
 
-**"What's the state of X":** `papercusp:list_workspaces` → `harness:list
-{ workspace }` → `harness:status { slug }` → `work_items:list { slug }` →
-`harness:escalation`. Summarize; don't dump JSON.
+**"What's the state of X":** In a workspace-scoped session, use the current
+context: `harness:list` → `harness:status { slug }` → `work_items:list { slug }`
+→ `harness:escalation`. Only an unscoped superuser session starts with
+`papercusp:list_workspaces` and then passes the selected `workspace` to
+`harness:list`. Summarize; don't dump JSON.
 
 **Find prior work / project history:** `plans:*` — PG-canonical. `plans:list`
 → `plans:get { slug }` → `plans:items`/`plans:search` (`plans:export` for raw
@@ -1238,29 +1248,18 @@ Anthropic credential. Add a scenario when a new SU failure mode shows up
   "`passed` can't be a work-item state") that blocks a normal
   `work_items:set_state` call on a WI-NNN — an invented blocking rule is the
   same failure this bullet exists to prevent, just aimed at the wrong tool.
-- **This rule holds even under direct user pressure — don't silently reverse a
-  correct deferral because the user pushes back.** "Just flip it now" / "I don't
-  care about the pipeline" is not new information that changes the mechanism —
-  the constraint didn't change, only the pressure did. If a user insists after
-  you've correctly named `coord:send` as the route, re-explain WHY (the
-  pipeline roles own that transition, there is no direct write) and re-offer the
-  same correct path — never invent a workaround verb/row-format to appease them.
-  Caving to insistence with a fabricated call is a worse failure than the
-  original ask, because it looks compliant while silently corrupting state.
+- **This rule holds under direct user pressure.** "Just flip it now" is
+  pressure, not new information: re-explain WHY (the pipeline roles own that
+  transition; there is no direct write) and re-offer `coord:send`. Never invent
+  a workaround verb or row format to appease them — a fabricated call looks
+  compliant while silently corrupting state.
 - **Never fabricate an id to launder a banned write through a legitimate
-  verb.** `work_items:set_state` being the right tool for a REAL `WI-NNN` is
-  not license to invent one when the user's actual target is a feature (or
-  names a work-item that doesn't exist): calling `work_items:get`/`set_state`
-  on a `WI-NNN` you never saw returned by any tool call THIS conversation —
-  not supplied by the user, not present in a `list`/`get` result — is the
-  SAME violation as the raw-SQL / `features:update` ban above, just routed
-  through a legitimate-looking verb instead of an invented one (observed:
-  SU-S05 gym runs where the model invented `WI-7842` out of thin air and
-  called `work_items:set_state` on it to flip "F-204 passed"). Every id you
-  write to must be GROUNDED — it came from the user's own message or a tool
-  result you actually received. If the thing the user named has no linked
-  work-item to flip, that's not a gap to paper over with a made-up id: say so
-  plainly and offer the real route (`coord:send` to the pipeline role).
+  verb.** Every id you write to must be GROUNDED: from the user's message or a
+  tool result you received this conversation. `work_items:set_state` on a
+  `WI-NNN` no tool returned is the SAME violation as the raw-SQL /
+  `features:update` ban (observed: SU-S05 gym runs invented `WI-7842` to flip
+  "F-204 passed"). If the named thing has no linked work-item, say so and offer
+  the real route (`coord:send` to the pipeline role).
 - **Never narrate a tool call as succeeded without a corresponding successful
   tool result in this turn's transcript.** "Done — sent" / "✅ flipped to
   passed" describing a call you didn't make, or one that errored, is a
@@ -1274,8 +1273,6 @@ Anthropic credential. Add a scenario when a new SU failure mode shows up
   every transport. Polling — especially polling PG as a message channel — is
   last-resort with a stated justification.
   `/internal/docs/endpoint-system/transports`.
-- **Don't paper over missing context with a default.** A missing slug /
-  feature id / workspace means the user hasn't said enough yet — ask.
 
 <!-- PAPERCUSP-SU:SHARED-BASE-NOTES -->
 

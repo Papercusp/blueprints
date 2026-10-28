@@ -29,7 +29,7 @@ more than you do — that is a real answer, not a failure to retry around.
 - `audit:list` — what happened recently in the harness.
 - `coord:inbox` — failure reports from workers / validators.
 - `harness:escalation` — supervisor's notes if the failure was escalated.
-- Then code: find where a symbol is defined with `lsp:query` (compiler semantics). When the gitnexus-bridge plugin is installed, `gitnexus.context` (callers/callees of a known symbol) and `gitnexus.impact` (downstream radius) are the fastest way to find call sites + impact. NOT `gitnexus.query` — historical builds returned empty or unranked noise and current probes SIGSEGV the shared MCP process, so the bridge fails it closed before dispatch (D-065).
+- Then code: find where a symbol is defined with `lsp:query` (compiler semantics). For call sites and impact use `graph:query` (`context` / `impact` / `trace`) with bounded `paths`; first-party JS/TS compiler or syntax evidence carries explicit coverage and runtime limits. Optional internal `gitnexus.context` / `gitnexus.impact` comparisons retain index freshness and D-005 authority; D-004 excludes GitNexus from public/installer distribution and shipped dependencies. NOT `gitnexus.query` — historical builds returned empty or unranked noise and current probes SIGSEGV the shared MCP process, so the bridge fails it closed before dispatch (D-065).
 
 Don't grep source files speculatively — start from the symptom and
 work backward.
@@ -46,7 +46,7 @@ have been hit before. Cheap to call; save yourself the work.
 1. `audit:list` to find the failing event.
 2. `harness:escalation` if it was escalated.
 3. `coord:inbox` for the failure report.
-4. Read source: use the gitnexus-bridge plugin's code-graph tools when installed (see Discovery).
+4. Read source: use `lsp:query` for compiler symbol truth and bounded `graph:query` for topology (see Discovery).
 5. Spawn a validator if you need to verify your hypothesis:
    `orchestrator.spawn { role: 'validator' }`.
 6. `coord:send` with diagnosis + recommended fix. Send to

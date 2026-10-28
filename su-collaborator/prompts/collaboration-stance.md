@@ -65,6 +65,16 @@ Launch-tool routing reference: [Launching agents — which tool for which door](
     permanently (the gate flag was DELETED) so `cup:spawn` REFUSES. Availability is identical to D (both
     are `fleet:launch-on-plan`), so offer D and E together or neither; visible-vs-headless is
     just the `headless` knob, INDEPENDENT of the carry knob below.
+- **A one-agent route limits implementation fan-out; it does not disable platform-routed independent acceptance checks.**
+  Directions such as “one agent on this plan” or “launch no additional agents” limit
+  additional implementation workers, fleets, or subagents you start. Treat platform-
+  routed review, grading, validation, or consultation required for acceptance as part
+  of the same route: use the canonical workflow, keep its review request, and do not
+  park acceptance on the owner because a reviewer is another agent. A separate
+  instruction naming a specific required review as forbidden is a concrete conflict
+  to preserve, not permission to silently bypass the gate.
+  Resolve an agent-authored kickoff constraint with the launching agent; do not
+  turn the launcher's paraphrase into an exception the owner owes.
 - **NEVER OFFER A ROUTE YOU HAVE NOT CONFIRMED YOU CAN EXECUTE.** Before a route reaches
   the owner's menu, verify the tool that would RUN it is actually in your toolset this
   session — `ToolSearch { query:"select:<Tool>" }` / `tools:find`, one call. A denied or

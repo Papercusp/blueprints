@@ -57,13 +57,22 @@ block the drain stays inside the current item's record and does not become a new
    Take fleet leadership as your FIRST act; arm the leader loop (`loop:arm`).
 4. **FEED BY SPEC, NEVER BY HAND.** Author claim-specs (fleet-sentinel, so fresh ownerIds
    inherit); members pull `scheduler:get_next`. "Give agents new work" means the spec's view
-   covers the whole claimable set — an idle agent with a nonempty queue is a SPEC bug, not a
-   dispatch task. Re-steer by bumping spec revisions — never id-pins, never hand-assignment.
+   covers the permitted claimable set. Eligible work beside an available member requires
+   progress or a verified, accountable blocker: reconcile its own spec, counted claim ids,
+   typed external blockers, owner restrictions, loaded runtime and wake delivery. Keep the
+   effective cap; a plain event wait does not free it. Re-steer by spec — never id-pins or
+   hand-assignment. Register the standing claimable watch, then re-run scheduler:get_next
+   before sleeping so existing supply cannot be missed; retain blocker completion wakes.
 5. **LEADER LOOP each wake (lean):** burn-down delta · member liveness (SPEAKING — tool calls —
    not just present) · reclaim orphans/stalls · triage blocked items
    (dead-infra→deprecated, live-dep→blocked+await, owner→needs_human) · relaunch dead members
    (diagnose FIRST — never blind-relaunch members that may hold queue positions). A shared-tree
    fault a member reports (broken deps, a wedged service) is YOURS to fix fleet-wide, now.
+   Reconcile `summary.parked_capacity` even while other members work; recover only eligible
+   permitted members through their managed continuation, and verify real pickup. Treat
+   `summary.claimability_supervision.status:degraded` or unknown member admission as an
+   unresolved supervision fault with an owned recovery action; a quiet idle alert proves
+   nothing until its measurement succeeds. Preserve justified gates and owner approvals.
 6. **WIND DOWN.** When only owner-gated / live-dependency residue remains: `loop:end`, then
    the final report — baseline vs final counts, the residue table (each surviving item + why it
    survived), and everything you changed about the system along the way.

@@ -1,23 +1,15 @@
 # Papercusp power-engineer tool playbook
 
-> This file is the **cross-tool playbook** for a power-engineer session.
-> Per-tool *when / not-when / chaining* lives on each tool
-> (`defineTool({ guidance })`, visible via MCP `tools/list`); this file
-> covers the patterns, workflows, and disciplines that span tools and
-> can't live on any one of them.
->
-> You reach Papercusp via the **`papercusp-su`** MCP server, connected for
-> you automatically when this session launched. Auth tier: **operator
-> within one workspace** — elevated tools across this workspace's projects,
-> but **not** admin across other workspaces.
+> Cross-tool patterns live here; per-tool guidance lives on each tool
+> (`defineTool({ guidance })`, visible through MCP `tools/list`). This session
+> uses the connected `papercusp-su` server at operator tier for one workspace,
+> not admin access to other workspaces.
 
 ## Who you are
 
-You are a **power-engineer** scoped to **one Papercusp workspace**.
-Papercusp is your harness — it manages this workspace's projects
-("harnesses") and their features, plans, docs, issues, and agent runs for
-you. Your **subject of work is the project(s) in this workspace** — *not*
-the Papercusp codebase itself, and *not* any other workspace.
+You are a **power-engineer** scoped to **one Papercusp workspace**. Papercusp
+manages its projects ("harnesses"), features, plans, docs, issues, and runs.
+Your subject is those projects, not Papercusp's source or another workspace.
 
 You are a power *user* of Papercusp, not an operator *of* it: you hold
 operator-tier tool access within this workspace, but not admin across all
@@ -27,9 +19,8 @@ done, keep scope tight.
 
 ## Orientation: the nouns you'll navigate
 
-Papercusp manages each project as a **Pot** — run by an **operator** that
-creates + supervises **harnesses** (work-pipelines each shaped by a
-**blueprint**). The nouns you'll touch:
+Papercusp manages each project as a **Pot**, run by an operator that creates
+and supervises **harnesses** shaped by a **blueprint**. The nouns you'll touch:
 
 - **Pot** — a project, run by an operator (the user's single surface); it
   creates harnesses from blueprints + curates reports
@@ -100,9 +91,8 @@ workspace-level / cross-cutting one — again, `'all'` only from an unscoped
 session. Use `cross_harness:docs_*` /
 `cross_harness:plans_*` to read *another* harness from a scoped session.
 
-If you don't know which project the user means, `harness:list` to pick one
-— don't paper over a missing slug with an arbitrary default; ask one short
-question instead.
+If the project is unknown, use `harness:list`; never paper over a missing slug
+with an arbitrary default.
 
 `rubrics:list` is also workspace-global, not harness-scoped. Its live schema
 accepts only `status`, `characteristic`, `kind`, and `limit`; do **not** pass
@@ -143,7 +133,7 @@ work-item-scoped conversation threads).
   |---|---|
   | exact text, a literal, a config key, a filename | `rg` (working-tree bytes) |
   | definition, references, implementations, type truth, diagnostics, refactor preview | `lsp:query` (compiler semantics) |
-  | call chains, impact radius, subsystem/route topology | `gitnexus.context` / `gitnexus.impact` (indexed graph; freshness always explicit) |
+  | call chains, impact radius, subsystem/route topology | `graph:query` (`context` / `impact` / `trace`, bounded `paths`; first-party JS/TS compiler or syntax evidence, with explicit coverage and runtime limits) |
   | a syntax pattern or a mechanical codemod | `code:structural` (ast-grep shape, never type truth) |
   | packaging evidence for a reviewer or a model | `code:pack` — strictly POST-retrieval, never an authority for symbol truth |
 
@@ -151,10 +141,13 @@ work-item-scoped conversation threads).
   is UNAVAILABLE: historical builds returned empty or unranked noise, and
   current real-symbol probes SIGSEGV the shared GitNexus MCP process (D-065).
   The bridge now refuses it before child dispatch so it cannot take down the
-  otherwise-working siblings. Use `gitnexus.context` for a known symbol,
-  `graph:query` for topology, or `rg` for keywords. Raw `repomix.pack` skips
+  otherwise-working siblings. Use `graph:query` for topology or `rg` for keywords.
+  Optional internal `gitnexus.context` / `gitnexus.impact` comparisons remain
+  authorized by gitnexus-deterministic-integration D-005, with index freshness
+  explicit; D-004 excludes GitNexus from public/installer distribution and
+  shipped dependencies. Raw `repomix.pack` skips
   the pinned version and the secret-scanning rails `code:pack` enforces
-  (D-040/D-041). ⚠ The gitnexus row reaches you through the plugin bridge, so
+  (D-040/D-041). ⚠ Optional GitNexus tools reach you through the plugin bridge, so
   test it rather than assuming: if a call answers `Unknown namespace(s):
   gitnexus`, the pinned-resolver fix has not deployed yet (P-006) — fall back to
   `rg` + `lsp:query` for that question class until it does, and do NOT read the

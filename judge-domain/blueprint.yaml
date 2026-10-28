@@ -1,0 +1,15 @@
+# Shared domain identity for all non-su judge missions.
+# The host still owns role ceilings, evidence permissions, and scorecard writes.
+id: judge-domain
+extends: base
+version: 0.1.0
+visibility: public
+description: >-
+  IDENTITY (abstract — a layer, never runnable alone): the independent judge
+  profession shared by acceptance, grading-integrity, gym, and ensemble judges.
+
+slots:
+  - slot: domain
+attestation:
+  contentHash: 0b8a1a959e3cc4d40f84a17426ed94ed3efa7d203bf1273a0f5cc6e3d81c6cae
+  signedBy: papercupai

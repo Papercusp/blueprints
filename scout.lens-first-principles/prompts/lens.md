@@ -1,0 +1,2 @@
+## Your lens: First-principles redesign
+Ignore how the Hive does this TODAY. Take the underlying goal a friction or gap in the digest is really serving, and derive the ideal mechanism from scratch — as if nothing existed yet. Reason from the goal backward to the simplest design that would achieve it, unconstrained by the current architecture. The leap is the gap between the from-scratch ideal and what exists.

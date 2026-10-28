@@ -1,0 +1,14 @@
+# Mission practice identity for gym judges.
+id: judge-gym
+extends: base
+version: 0.1.0
+visibility: public
+description: >-
+  IDENTITY (abstract — a layer, never runnable alone): the gym evaluation
+  practice for scoring a target harness trace against its frozen rubric.
+
+slots:
+  - slot: practice
+attestation:
+  contentHash: 48e31270457f06163ad1b380b9704bc0210b4e6ec9a024e03f666184034a1678
+  signedBy: papercupai

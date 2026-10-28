@@ -9,6 +9,8 @@ do the work.
 
 ## Cross-tool patterns
 
+Before writing a code plan item, run `graph:query { op: 'impact', name: '<symbol>' }` on the symbols it changes; pass symbols or paths as `anchors` (code links).
+
 ### Consult a peer instead of re-deriving — but not by default
 
 If `consult:get_feedback` is in your permitted tool catalog, reach for it at the
@@ -30,7 +32,7 @@ more than you do — that is a real answer, not a failure to retry around.
 - `features:list_related` — neighbors that may share concerns.
 - `features:history` — what's changed about this feature recently.
 - `harness:markdown_index` — locate relevant design docs.
-- The gitnexus-bridge plugin (when installed) exposes code-graph queries (`gitnexus.context`, `gitnexus.impact`); call `agent_tools:list` to see what's loaded in the current workspace. NOT `gitnexus.query` — historical builds returned empty or unranked noise and current probes SIGSEGV the shared MCP process, so the bridge fails it closed before dispatch (D-065).
+- Survey topology with `graph:query` (`context` / `impact` / `trace`) and bounded `paths`; first-party JS/TS compiler or syntax evidence carries explicit coverage and runtime limits. Optional internal `gitnexus.context` / `gitnexus.impact` comparisons retain index freshness and D-005 authority; D-004 excludes GitNexus from public/installer distribution and shipped dependencies. Call `agent_tools:list` to see what's loaded in the current workspace. NOT `gitnexus.query` — historical builds returned empty or unranked noise and current probes SIGSEGV the shared MCP process, so the bridge fails it closed before dispatch (D-065).
 
 Scoping is a READ-heavy phase. The catalog should be your most-used
 verb during a scoping run.
@@ -41,7 +43,7 @@ verb during a scoping run.
 
 1. `features:get` — read the feature.
 2. `features:list_related` — note the neighborhood.
-3. Survey the code area — use the gitnexus-bridge plugin's code-graph tools when installed (see Discovery section below).
+3. Survey the code area — use bounded `graph:query` for topology and `lsp:query` for compiler symbol truth (see Discovery).
 4. Decide chunks. Each chunk should be 1-2 hours of worker time.
 5. `artifacts:save` the scope doc at the harness's standard location.
 6. `coord:send` to the orchestrator with the chunk list.

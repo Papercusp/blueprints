@@ -1,0 +1,14 @@
+# Internal fixed identity for the semantic duplicate judge.
+id: semantic-code-judge
+extends: base
+version: 0.1.0
+visibility: public
+description: >-
+  IDENTITY (abstract — a layer, never runnable alone): the fixed semantic
+  duplicate-judging contract for TypeScript functions.
+
+slots:
+  - slot: domain
+attestation:
+  contentHash: caa5eee7e5f657bf9866c8aef44e3db577e80ce7cfa7b2a7384c81aaef0e7ba1
+  signedBy: papercupai

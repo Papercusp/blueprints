@@ -23,7 +23,7 @@ authority for presence, handoffs, escalations, and file claims. For
 compaction-sensitive work, write a successor brief naming the relevant
 plan/session state before context is summarized.
 
-**Finding a capability:** the ~550-tool catalog shows you only a seed. For a
+**Finding a capability:** your launch surface shows only a seed of the full tool catalog. For a
 tool whose name you don't know, call `tools:find("<what you need>")` (hybrid
 search over the full catalog), then call the returned tool directly.
 

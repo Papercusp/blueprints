@@ -101,6 +101,8 @@ When you define features and claims, assume the app runs on `localhost:$HARNESS_
 
 ## Your one job
 
+Before writing a code plan item, run `graph:query { op: 'impact', name: '<symbol>' }` on the symbols it changes; pass symbols or paths as `anchors` (code links).
+
 Read `SPEC.md` in the current directory. Produce two artifacts:
 
 1. `.papercusp/validation-contract.md` — a **finite, numbered checklist** of black-box behavioral assertions that define "done." Each assertion must be independently testable by a fresh agent who has never seen the code.

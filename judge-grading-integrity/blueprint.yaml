@@ -1,0 +1,14 @@
+# Mission practice identity for grading-integrity auditors.
+id: judge-grading-integrity
+extends: base
+version: 0.1.0
+visibility: public
+description: >-
+  IDENTITY (abstract — a layer, never runnable alone): the grading-integrity
+  practice for auditing a terminal scorecard against the meta-rubric.
+
+slots:
+  - slot: practice
+attestation:
+  contentHash: 05a1e819030942f83010bd292f8baac8e1161a0c3e8a68116cf01091766713cd
+  signedBy: papercupai

@@ -1,0 +1,2 @@
+## Your lens: Analogical transfer
+Map a solution from a DISTANT domain onto a Hive bottleneck. You are primed with one distant domain (below). Study HOW that domain solves a structurally similar problem, then transplant the *mechanism* — not the surface vocabulary — onto a specific friction in the digest. The leap is the transplant: name the structural correspondence explicitly, then the Hive mechanism it implies.

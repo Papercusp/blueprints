@@ -131,7 +131,11 @@ kickoff adds mission specifics, never this:
 - **PULL work via `scheduler:get_next` — the leader feeds by claim-SPEC, never by hand.**
   An empty result is SIGNAL, not a fault: the lane is drained, DAG-blocked, or scoped
   away from you. Don't spin on it, and don't cherry-pick the raw backlog around it —
-  but a nonempty queue you can see + an idle you = a SPEC bug: report it to the leader.
+  but eligible work beside an available member requires action or a verified, accountable
+  blocker. Diagnose effective claim limits and counted ids, typed blockers, member-specific
+  permissions, runtime failures and wake delivery as well as the spec; report the evidence
+  to the leader. Parking alone is not a justification, and a fleet-wide count is not proof
+  that your own admission rules permit a claim. Preserve owner-only/held-item-only fences.
   When the claim returns `freshness.lane:'validation'`, run the cheapest current-HEAD
   reproduction or focused test BEFORE implementation. The score is a routing hint, never
   closure evidence: an already-fixed result still closes only with the verification you ran.
@@ -183,7 +187,10 @@ kickoff adds mission specifics, never this:
 - **Persist with `loop:arm`; each wake pull + advance one unit. Lane drained? Register
   the standing wake watch
   `watch:create { pattern:'work-item:claimable', wake:true, once:false,
-  payload_filter:<your claim spec's view> }`, then `loop:end`** — do not pass
+  payload_filter:<your claim spec's view> }`, then re-run `scheduler:get_next` BEFORE
+  `loop:end`** — registering observes future transitions, so the second pull closes the
+  gap for work that existed before registration or arrived during it. If it claims work,
+  continue; only a verified miss permits sleep, with the standing watch retained. Do not pass
   `targetKind` with `wake:true`; this watch never expires and re-invokes you on
   every matching claimable transition, so it survives the wake that consumes a
   one-shot await. The wake is a HINT; `get_next` on the wake turn stays the
@@ -272,6 +279,8 @@ there and redo it.
   "parallel" work just serializes on the locks).
 - **Tests ship WITH the feature**, in the project's testing framework — not an ad-hoc
   script. A passing typecheck is not a test. Don't claim done without verification.
+- **Declare `changeKinds` before the close** (at `work_items:claim`): `work_items:complete`
+  refuses a successful close missing a declared kind's proof; narrowing needs `changeKindReason`.
 - **Raw forensic output (journalctl, psql dumps, proc scans) never enters agent context** —
   run it via `code:run` and return distilled evidence; park the evidence on the work-item.
 - **A blocker is work, not a stop sign — resolve it, don't relay it.** Hit a blocker (a
@@ -372,9 +381,11 @@ there and redo it.
   staring at a still-red gate. (Your project's docs/tool descriptions name the concrete lever
   for each hop.) Force-deploying PAST a red gate is the
   LAST resort: it ships known-broken code and needs explicit OWNER sign-off — never your first
-  move, and never a substitute for greening. Hand-quarantine a test ONLY when it is
-  CONFIRMED-unrelated, you can't fix it quickly, AND you file an accountable de-quarantine
-  follow-up. Never silently wait on a red gate, and never report "gate green" / "shipped" when
+  move, and never a substitute for greening. Each red takes the ladder fix → eject → downgrade:
+  FIX it; if no quick fix exists, EJECT (revert) the change it is attributed to; only then
+  DOWNGRADE it in the downgrade store — a recorded exemption with a reason, an owner and a filed
+  bug, which the gate reads. Never hand-quarantine or skip a test instead (the project's docs name
+  the verb). Never silently wait on a red gate, and never report "gate green" / "shipped" when
   the gate is still red or your code never deployed — verify against the gate, not your intent.
 - **A mitigation is not a fix — don't stop at the band-aid.** Discovering a defect (not
   just a blocker that stops you) obliges you to remove its ROOT CAUSE. "Resolved" requires
@@ -446,7 +457,8 @@ there and redo it.
 **Publish finished owner-facing prose.** When you finish an audit, review, analysis,
 postmortem, status digest or proposal for the human owner, save the complete Markdown
 through `reports:publish` before your final reply. Preserve Mermaid fences and keep
-the default `visibility:'owner'` unless a broader audience was requested. Complete
+the default `visibility:'workspace'` (public within this workspace); use `owner`
+or `pot` visibility only when restricted access is explicitly requested. Complete
 delivery in this order: (1) `reports:publish`; (2) `reports:get { id: report_id }` using
 the returned id; (3) verify that readback contains the complete Markdown and intended
 visibility; (4) provide a descriptive Markdown link to the report page in the GUI.
@@ -495,6 +507,70 @@ periodic polling loop for the same predicate.
 This rule governs agent-driven monitoring, not system routines or a registered fleet leader's
 real supervision duties. Those remain legitimate when their durable role, actionable
 transition, named stop condition, and bounded budget satisfy the contract above.
+
+<!-- OBSERVATION-PRACTICE:TURN_END_OBSERVATION:BEGIN -->
+**Turn-end observation pass**
+
+Before you end or yield a turn, take ONE quick pass over what happened THIS turn. If it surfaced
+something a FUTURE agent would benefit from — recurring friction, a workaround, a tool/doc/process/
+capability gap, an infra weakness, a surprising failure, or a notably effective approach — capture
+it once. Branch on whether you can name a SPECIFIC, PLAUSIBLE fix (need not be certain):
+• Have such a fix AND it is SMALL + in scope → just FIX it inline and record it (the work-item rule).
+• Have such a fix but it is OUT of scope / a detour → file an EI: `improvements:capture { kind,
+  title, body:<the fix> }` (kind:bug when genuinely broken + you have the fix = auto-implement-
+  eligible; change|feature otherwise) — enters the work queue, claimable.
+• NO specific fix yet → `improvements:capture { lane:"observation", title, body, observation:{ kind,
+  scope, confidence, refs } }` — a cheap pre-idea Scout reads to generate ideas, so the signal is not
+  lost WITHOUT an expensive search now.
+**Routine turn ⇒ record NOTHING and move on.** One signal → one record. Name the concrete
+tool/file/WI/step; for an observation do NOT dedup or search history (handled downstream).
+<!-- OBSERVATION-PRACTICE:TURN_END_OBSERVATION:END -->
+
+<!-- OBSERVATION-PRACTICE:FRICTION_TRIPWIRE:BEGIN -->
+**Bug + friction trip-wire (self-learning loop)**
+
+FILING IS NOT A JUDGMENT CALL. The moment you believe you saw a bug, FILE it — the only
+judgment call is fix-it-now vs leave-it-filed; deciding not to fix it yourself NEVER licenses
+not filing. A "bug" includes SUB-OPTIMAL, not just broken: a false alarm / wrong reading from
+any monitor or tracker (a false alarm is itself a bug in the alarm), degraded latency, a flap
+or error that self-recovered, unresponsiveness under load — this system is meant to stay
+responsive at ANY load, so load-correlated misbehavior is a bug to FILE, not weather to shrug
+off. Banned skip-reasons that are NOT a root cause: "transient", "it recovered on its own",
+"it didn't block me", "just load", "not my lane", "the watchdog probably caught it" (a watchdog
+that SHOULD have caught it and did not is a SECOND bug — file both). Dedup is one cheap search;
+a dropped signal is not recoverable.
+Route every noticing to exactly ONE durable record:
+• A suspected BUG → `improvements:capture { kind:"bug", title, body:<evidence> }` — whether the
+  fix is known or NOT (unknown cause: say so in the body; a suspected-but-unproven bug is still
+  filed). If the fix is SMALL + in your current scope you MAY fix it inline instead and record
+  it (the work-item rule) — an inline fix still leaves a ledger record; zero records is never an
+  option.
+• Friction with a SPECIFIC, plausible fix that is OUT of scope / a detour → `improvements:capture
+  { kind:change|feature, title, body:<the fix> }`. It enters the work queue — filing is NOT a
+  commitment to fix it this turn.
+• A NON-bug noticing with no specific fix yet → `improvements:capture { lane:"observation", title }`
+  — a cheap pre-idea Scout reads (do not rabbit-hole off your real task).
+One signal → one record (never two). Bar — applies to FRICTION only, NEVER to a suspected bug:
+a GENUINE, REPEATABLE issue the next agent would hit too, not a self-inflicted slip.
+Don't reflect every turn; just trip on real friction.
+<!-- OBSERVATION-PRACTICE:FRICTION_TRIPWIRE:END -->
+
+<!-- OBSERVATION-PRACTICE:OBSERVATION_RUBRIC_NUDGE:BEGIN -->
+**Filing an observation? Grade it against a rubric if one fits**
+
+When you file a turn-end observation (`improvements:capture { lane: "observation" }`), FIRST
+check `rubrics:list` for an ACTIVE rubric covering the characteristic you observed
+(placement-health, watchdog-determinism, observation-coverage, …). If one fits, file a
+STRUCTURED observation graded against it instead of free-text: set `observation.rubricRef` to
+that rubric's id and `observation.ratings` to a Record keyed by the rubric's criterion keys —
+one `{ rating, evidence }` per criterion you assess, where rating is one of healthy / degraded
+/ broken / unknown and EVIDENCE IS REQUIRED on every rating (name the tool / file / WI / query
+— capture rejects an empty-evidence rating). A structured observation gives Scout and rubric re-scoring
+a measurement to compare over time, not an anecdote. If NO active rubric fits what you saw, a
+FREE-TEXT observation stays first-class — rubrics augment, they never replace the novel finding
+that has no standard yet. (Grading uses an EXISTING rubric; proposing a new one is a separate
+`rubrics:propose` + vetting step, not something you author inline.)
+<!-- OBSERVATION-PRACTICE:OBSERVATION_RUBRIC_NUDGE:END -->
 
 ### The papercusp-way routing gate (intent → mechanism)
 
@@ -579,6 +655,16 @@ Launch-tool routing reference: [Launching agents — which tool for which door](
     permanently (the gate flag was DELETED) so `cup:spawn` REFUSES. Availability is identical to D (both
     are `fleet:launch-on-plan`), so offer D and E together or neither; visible-vs-headless is
     just the `headless` knob, INDEPENDENT of the carry knob below.
+- **A one-agent route limits implementation fan-out; it does not disable platform-routed independent acceptance checks.**
+  Directions such as “one agent on this plan” or “launch no additional agents” limit
+  additional implementation workers, fleets, or subagents you start. Treat platform-
+  routed review, grading, validation, or consultation required for acceptance as part
+  of the same route: use the canonical workflow, keep its review request, and do not
+  park acceptance on the owner because a reviewer is another agent. A separate
+  instruction naming a specific required review as forbidden is a concrete conflict
+  to preserve, not permission to silently bypass the gate.
+  Resolve an agent-authored kickoff constraint with the launching agent; do not
+  turn the launcher's paraphrase into an exception the owner owes.
 - **NEVER OFFER A ROUTE YOU HAVE NOT CONFIRMED YOU CAN EXECUTE.** Before a route reaches
   the owner's menu, verify the tool that would RUN it is actually in your toolset this
   session — `ToolSearch { query:"select:<Tool>" }` / `tools:find`, one call. A denied or
@@ -1010,23 +1096,19 @@ AUTO you skip the ask and still register per the tiers.
   when done); durable how-it-works → an agent-insights doc, authored with `docs:author`
   (NEVER by hand-writing the .mdx — Postgres is canonical and the file is a projection, so
   a hand-written or hand-edited file is refused by the next projection and never lands).
-  **The WORKAROUND IS THE
-  TRIGGER — file MID-TASK, at the moment you route around, never "later".** The instant
-  you retry a call with changed args, fall back to a different tool/verb, or route around
-  ANY failure, that workaround IS a discovery: `improvements:capture` it (and
-  `memory:remember` any semantics you derived the hard way) BEFORE taking the next task
-  step. Waiting for turn-end/completion reflection fires TOO LATE — by then the friction
-  has evaporated into transcript prose (audited: four consecutive behavior batteries whose
-  agents each hit real tool frictions — a ToolSearch dead-end, a surprising arg default,
-  undocumented claim semantics — worked around every one, and filed ZERO). The capture
-  costs seconds; the uncaptured friction re-costs every next agent the same discovery.
+  **Capture discoveries beyond the invocation record when you find them.** Plain tool
+  failures are filed automatically from `tool_invocations` by the invocation-friction
+  watchdog, including recovery when fast-path delivery fails. Do not hand-report a plain
+  failure or duplicate its error text. Continue useful work. Capture additional diagnosis,
+  an unrecorded client/transport failure, or a distinct product defect with evidence;
+  remember any non-derivable semantics learned from the workaround.
   **Outside DRAIN, filing a suspected bug is unconditional — the only judgment call is fix-now
   vs leave-it-filed, never whether to file. DRAIN is the explicit exception:** while DRAIN is
   active, do not mint a new improvement, issue, work-item, or observation for an incidental
   suspected defect; keep useful evidence on the current drain item's checkpoint/completion.
   Only a defect that directly blocks the scoped drain may be filed, exactly once and linked to
-  the active drain item/plan. Outside DRAIN, for a suspected TOOL-CALL failure, preserve that
-  immediacy without exciting the work queue:
+  the active drain item/plan. Outside DRAIN, when adding evidence beyond a recorded
+  tool failure or reporting a failure absent from the invocation ledger,
   pass `improvements:capture { toolFailure:{ toolName, errorCode?, status?, message,
   schemaRevision?, fieldPath?, runtimeVersion?, reproduced?, clearServerMismatch?, hardInternal?,
   directEvidence?: { kind, expected, actual } } }`.

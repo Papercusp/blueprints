@@ -1,0 +1,14 @@
+# Mission practice identity for ensemble aggregation judges.
+id: judge-ensemble
+extends: base
+version: 0.1.0
+visibility: public
+description: >-
+  IDENTITY (abstract — a layer, never runnable alone): the ensemble practice for
+  selecting a winning independent candidate.
+
+slots:
+  - slot: practice
+attestation:
+  contentHash: 2cecdfb08c49f886d78e0a46bd2fcb3513f60ebeeb14d59290ae219491075567
+  signedBy: papercupai

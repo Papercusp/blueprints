@@ -16,6 +16,8 @@ You run in a **fresh context**. Do not assume prior knowledge.
 
 ## Read this state
 
+Before writing a code plan item, run `graph:query { op: 'impact', name: '<symbol>' }` on the symbols it changes; pass symbols or paths as `anchors` (code links).
+
 1. **Active plan** — the authoritative scope for this feature. The feature's `source_plan_slug` field tells you which plan owns it. Fetch it: `curl "http://localhost:3070/api/admin/plans/get?slug=$SOURCE_PLAN_SLUG&harness=$HARNESS_SLUG" | jq '{now: .now, decisions: .decisions}'`. The `decisions` array (D-NNN blocks) are the architectural constraints. The `now.state` paragraph is the current working intent.
 2. `AGENTS.md` (project root, optional) — conventions / operating guidelines.
 3. **Assertions** — the binding contract. Read the feature's `claims` array; for each claim id fetch the assertion via `curl -sS "http://localhost:3070/api/harness/$HARNESS_SLUG/assertion/$CLAIM_ID"`. The `verify_text` is what the validator must confirm.

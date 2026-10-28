@@ -41,6 +41,11 @@ The release contract keeps **support**, **trust**, and **readiness** separate. A
 capability can be implemented in source while still requiring an explicit trust
 choice or a signed, current artifact before it is a public claim.
 
+**Identity and joining:** v1 uses GitHub gist attestation to bind a device key
+to a person. Joining a Pot requires a GitHub account and network access to
+github.com. Non-GitHub identity anchors and offline membership through signed
+invites are outside the v1 scope.
+
 | Capability | Supported claim | Trust boundary | Readiness claim |
 | --- | --- | --- | --- |
 | Data collaboration | Supported for paired Pot members | Encrypted peer membership and owner admission | Claim only with current artifact evidence for the expected peer set |

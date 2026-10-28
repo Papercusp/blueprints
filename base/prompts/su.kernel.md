@@ -163,10 +163,6 @@ it collision-free:
   msg_id and carries no free text), then send your one-line disposition as a separate
   `coord:send { expects:'none', summary }`.
 
-<!-- PAPERCUSP-SU:WORKSPACE-MAP -->
-
-<!-- PAPERCUSP-SU:PROMOTION-MODEL -->
-
 - **Plan before non-trivial work.** Durable plans live in the plan store (shared,
   fleet-visible), never only in a client-local task list. A plan is REQUIRED when work
   decomposes into >=2 work-items, has inter-dependent steps, outlives one session, or
@@ -400,23 +396,19 @@ AUTO you skip the ask and still register per the tiers.
   when done); durable how-it-works → an agent-insights doc, authored with `docs:author`
   (NEVER by hand-writing the .mdx — Postgres is canonical and the file is a projection, so
   a hand-written or hand-edited file is refused by the next projection and never lands).
-  **The WORKAROUND IS THE
-  TRIGGER — file MID-TASK, at the moment you route around, never "later".** The instant
-  you retry a call with changed args, fall back to a different tool/verb, or route around
-  ANY failure, that workaround IS a discovery: `improvements:capture` it (and
-  `memory:remember` any semantics you derived the hard way) BEFORE taking the next task
-  step. Waiting for turn-end/completion reflection fires TOO LATE — by then the friction
-  has evaporated into transcript prose (audited: four consecutive behavior batteries whose
-  agents each hit real tool frictions — a ToolSearch dead-end, a surprising arg default,
-  undocumented claim semantics — worked around every one, and filed ZERO). The capture
-  costs seconds; the uncaptured friction re-costs every next agent the same discovery.
+  **Capture discoveries beyond the invocation record when you find them.** Plain tool
+  failures are filed automatically from `tool_invocations` by the invocation-friction
+  watchdog, including recovery when fast-path delivery fails. Do not hand-report a plain
+  failure or duplicate its error text. Continue useful work. Capture additional diagnosis,
+  an unrecorded client/transport failure, or a distinct product defect with evidence;
+  remember any non-derivable semantics learned from the workaround.
   **Outside DRAIN, filing a suspected bug is unconditional — the only judgment call is fix-now
   vs leave-it-filed, never whether to file. DRAIN is the explicit exception:** while DRAIN is
   active, do not mint a new improvement, issue, work-item, or observation for an incidental
   suspected defect; keep useful evidence on the current drain item's checkpoint/completion.
   Only a defect that directly blocks the scoped drain may be filed, exactly once and linked to
-  the active drain item/plan. Outside DRAIN, for a suspected TOOL-CALL failure, preserve that
-  immediacy without exciting the work queue:
+  the active drain item/plan. Outside DRAIN, when adding evidence beyond a recorded
+  tool failure or reporting a failure absent from the invocation ledger,
   pass `improvements:capture { toolFailure:{ toolName, errorCode?, status?, message,
   schemaRevision?, fieldPath?, runtimeVersion?, reproduced?, clearServerMismatch?, hardInternal?,
   directEvidence?: { kind, expected, actual } } }`.
@@ -448,6 +440,4 @@ AUTO you skip the ask and still register per the tiers.
 ## Wire schemas
 
 <!-- PAPERCUSP-SU:WIRE-SCHEMAS -->
-
-<!-- PAPERCUSP-SU:SHARED-BASE-NOTES -->
 

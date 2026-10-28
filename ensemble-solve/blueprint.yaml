@@ -45,6 +45,7 @@ roles:
       solution. Diversity across solvers is the point.
   - id: judge
     account: null
+    stack: [domain:judge-domain, practice:judge-ensemble]
     description: >-
       Picks/merges the best of the N solver candidates for the task (the aggregation step). Its choice
       is the task's result.

@@ -1,0 +1,25 @@
+# The `scout.lens-reframing` IDENTITY — identity-system-everything-migration-2026-10-18
+# P-011 / R-8 ("Scout lenses are identity documents").
+#
+# ABSTRACT, like `base`: no workItem/spine, never loaded standalone. It is one of the
+# four Scout creative lenses (scout-ideation D-004). Its consumer is the Scout ideator,
+# a RENDER-ONLY consumer (`renderOnlyStack` in orchestrator/src/blueprint/render-stack.ts):
+# one structured LLM call with no kernel, no tools and no dispatch seat. So this
+# document declares no grants. A grant here would be refused at render time.
+#
+# The text in `prompts/lens.md` was moved verbatim from the `LENS_REGISTRY` constant in
+# packages/operator-core/lib/scout/lenses.ts (an identity has ONE home). Scout lens
+# weights (`harness_shared.scout_lens_weights.lens`) are keyed by THIS id.
+id: scout.lens-reframing
+extends: base
+version: 0.1.0
+description: >-
+  IDENTITY (abstract — a layer, never runnable alone): the Scout "Reframing /
+  problem-finding" creative lens. Rendered by the render-only Scout ideator;
+  declares no grants (P-011 / R-8).
+
+slots:
+  - slot: practice
+attestation:
+  contentHash: 79b670c3d68704725861ef5971ed06ea72366934783ed7b13a33344671228f36
+  signedBy: papercupai
